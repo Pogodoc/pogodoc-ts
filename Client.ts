@@ -5,7 +5,7 @@
 import * as environments from "./environments";
 import * as core from "./core";
 import { Templates } from "./api/resources/templates/client/Client";
-import { Render } from "./api/resources/render/client/Client";
+import { Documents } from "./api/resources/documents/client/Client";
 import { Tokens } from "./api/resources/tokens/client/Client";
 
 export declare namespace PogodocApiClient {
@@ -30,7 +30,7 @@ export declare namespace PogodocApiClient {
 
 export class PogodocApiClient {
     protected _templates: Templates | undefined;
-    protected _render: Render | undefined;
+    protected _documents: Documents | undefined;
     protected _tokens: Tokens | undefined;
 
     constructor(protected readonly _options: PogodocApiClient.Options) {}
@@ -39,8 +39,8 @@ export class PogodocApiClient {
         return (this._templates ??= new Templates(this._options));
     }
 
-    public get render(): Render {
-        return (this._render ??= new Render(this._options));
+    public get documents(): Documents {
+        return (this._documents ??= new Documents(this._options));
     }
 
     public get tokens(): Tokens {

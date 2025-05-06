@@ -9,7 +9,7 @@ import * as serializers from "../../../../serialization/index";
 import urlJoin from "url-join";
 import * as errors from "../../../../errors/index";
 
-export declare namespace Render {
+export declare namespace Documents {
     export interface Options {
         environment?: core.Supplier<environments.PogodocApiEnvironment | string>;
         /** Specify a custom URL to connect the client to. */
@@ -29,24 +29,24 @@ export declare namespace Render {
     }
 }
 
-export class Render {
-    constructor(protected readonly _options: Render.Options) {}
+export class Documents {
+    constructor(protected readonly _options: Documents.Options) {}
 
     /**
      * Creates a new render job with a unique ID, sets up S3 storage for template and data files, and generates presigned upload URLs if needed. Requires subscription check.
      *
      * @param {PogodocApi.InitializeRenderJobRequest} request
-     * @param {Render.RequestOptions} requestOptions - Request-specific configuration.
+     * @param {Documents.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.render.initializeRenderJob({
+     *     await client.documents.initializeRenderJob({
      *         type: "docx",
      *         target: "pdf"
      *     })
      */
     public async initializeRenderJob(
         request: PogodocApi.InitializeRenderJobRequest,
-        requestOptions?: Render.RequestOptions,
+        requestOptions?: Documents.RequestOptions,
     ): Promise<PogodocApi.InitializeRenderJobResponse> {
         const _response = await core.fetcher({
             url: urlJoin(
@@ -106,15 +106,15 @@ export class Render {
      *
      * @param {string} jobId
      * @param {PogodocApi.StartRenderJobRequest} request
-     * @param {Render.RequestOptions} requestOptions - Request-specific configuration.
+     * @param {Documents.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.render.startRenderJob("jobId")
+     *     await client.documents.startRenderJob("jobId")
      */
     public async startRenderJob(
         jobId: string,
         request: PogodocApi.StartRenderJobRequest = {},
-        requestOptions?: Render.RequestOptions,
+        requestOptions?: Documents.RequestOptions,
     ): Promise<PogodocApi.StartRenderJobResponse> {
         const _response = await core.fetcher({
             url: urlJoin(
@@ -175,10 +175,10 @@ export class Render {
      * Generates a preview by creating a single-page render job, processing it immediately, and returning the output URL. Used for template visualization.
      *
      * @param {PogodocApi.GenerateDocumentPreviewRequest} request
-     * @param {Render.RequestOptions} requestOptions - Request-specific configuration.
+     * @param {Documents.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.render.generateDocumentPreview({
+     *     await client.documents.generateDocumentPreview({
      *         templateId: "templateId",
      *         type: "docx",
      *         data: {
@@ -188,7 +188,7 @@ export class Render {
      */
     public async generateDocumentPreview(
         request: PogodocApi.GenerateDocumentPreviewRequest,
-        requestOptions?: Render.RequestOptions,
+        requestOptions?: Documents.RequestOptions,
     ): Promise<PogodocApi.GenerateDocumentPreviewResponse> {
         const { templateId, ..._body } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
@@ -253,10 +253,10 @@ export class Render {
      * Combines initialization and rendering in one step. Creates a job, uploads template/data directly, starts rendering, and adds the document to Strapi. Requires subscription check.
      *
      * @param {PogodocApi.StartImmediateRenderRequest} request
-     * @param {Render.RequestOptions} requestOptions - Request-specific configuration.
+     * @param {Documents.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.render.startImmediateRender({
+     *     await client.documents.startImmediateRender({
      *         startImmediateRenderRequestData: {
      *             "key": "value"
      *         },
@@ -266,7 +266,7 @@ export class Render {
      */
     public async startImmediateRender(
         request: PogodocApi.StartImmediateRenderRequest,
-        requestOptions?: Render.RequestOptions,
+        requestOptions?: Documents.RequestOptions,
     ): Promise<PogodocApi.StartImmediateRenderResponse> {
         const _response = await core.fetcher({
             url: urlJoin(
@@ -327,14 +327,14 @@ export class Render {
      * Fetches detailed job information from S3 storage including job status, template ID, target format, and output details if available.
      *
      * @param {string} jobId
-     * @param {Render.RequestOptions} requestOptions - Request-specific configuration.
+     * @param {Documents.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.render.getJobStatus("jobId")
+     *     await client.documents.getJobStatus("jobId")
      */
     public async getJobStatus(
         jobId: string,
-        requestOptions?: Render.RequestOptions,
+        requestOptions?: Documents.RequestOptions,
     ): Promise<PogodocApi.GetJobStatusResponse> {
         const _response = await core.fetcher({
             url: urlJoin(
