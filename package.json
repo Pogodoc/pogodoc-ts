@@ -1,0 +1,30 @@
+{
+  "name": "pogodoc-ts",
+  "version": "0.0.1",
+  "description": "pogodoc typescript sdk",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "tsx test.ts",
+    "install-imports": "node ./install-imports.js",
+    "build": "tsc"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^22.15.12",
+    "@types/qs": "^6.9.18",
+    "@types/readable-stream": "^4.0.18"
+  },
+  "dependencies": {
+    "axios": "^1.9.0",
+    "dotenv": "^16.5.0",
+    "js-base64": "^3.7.7",
+    "node-fetch": "^3.3.2",
+    "path": "^0.12.7",
+    "qs": "^6.14.0",
+    "readable-stream": "^4.7.0",
+    "tsx": "^4.19.4",
+    "url-join": "^5.0.0"
+  }
+}
