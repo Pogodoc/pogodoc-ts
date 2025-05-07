@@ -2,19 +2,25 @@
   "name": "pogodoc-ts",
   "version": "0.0.1",
   "description": "pogodoc typescript sdk",
-  "main": "index.js",
-  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "test": "tsx test.ts",
     "install-imports": "node ./install-imports.js",
-    "build": "tsc"
+    "build": "rimraf dist && tsc -p tsconfig.json && copyfiles package.json dist"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^22.15.12",
     "@types/qs": "^6.9.18",
-    "@types/readable-stream": "^4.0.18"
+    "@types/readable-stream": "^4.0.18",
+    "rimraf": "^6.0.1",
+    "copyfiles": "^2.4.1"
   },
   "dependencies": {
     "axios": "^1.9.0",
