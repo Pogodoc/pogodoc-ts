@@ -42,15 +42,12 @@ class PogodocClient extends PogodocApiClient {
       "application/zip"
     );
 
-    await this.templates.extractTemplateFiles(templateId);
-
+    const resp = await this.templates.extractTemplateFiles(templateId);
     const { pdfPreview, pngPreview } =
       await this.templates.generateTemplatePreviews(templateId, {
         type: metadata.type,
         data: metadata.sampleData,
       });
-
-    console.log(pdfPreview, pngPreview);
 
     await this.templates.saveCreatedTemplate(templateId, {
       templateInfo: {
@@ -147,12 +144,14 @@ class PogodocClient extends PogodocApiClient {
 
     const dataString = JSON.stringify(data);
     const dataStream = Readable.from(dataString);
+    console.log("jobid", initResponse.jobId);
 
     if (initResponse.presignedDataUploadUrl) {
       await uploadToS3WithUrl(
         initResponse.presignedDataUploadUrl,
         dataStream,
-        dataString.length
+        dataString.length,
+        "application/json"
       );
     }
 

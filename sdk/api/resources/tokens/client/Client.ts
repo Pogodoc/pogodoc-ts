@@ -39,7 +39,7 @@ export class Tokens {
      * @example
      *     await client.tokens.deleteApiToken("tokenId")
      */
-    public async deleteApiToken(tokenId: string, requestOptions?: Tokens.RequestOptions): Promise<unknown> {
+    public async deleteApiToken(tokenId: string, requestOptions?: Tokens.RequestOptions): Promise<void> {
         const _response = await core.fetcher({
             url: urlJoin(
                 (await core.Supplier.get(this._options.baseUrl)) ??
@@ -62,7 +62,7 @@ export class Tokens {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return _response.body;
+            return;
         }
 
         if (_response.error.reason === "status-code") {

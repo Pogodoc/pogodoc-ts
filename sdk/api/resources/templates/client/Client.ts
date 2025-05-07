@@ -123,7 +123,7 @@ export class Templates {
         templateId: string,
         request: PogodocApi.SaveCreatedTemplateRequest,
         requestOptions?: Templates.RequestOptions,
-    ): Promise<unknown> {
+    ): Promise<void> {
         const _response = await core.fetcher({
             url: urlJoin(
                 (await core.Supplier.get(this._options.baseUrl)) ??
@@ -147,7 +147,7 @@ export class Templates {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return _response.body;
+            return;
         }
 
         if (_response.error.reason === "status-code") {
@@ -264,7 +264,7 @@ export class Templates {
      * @example
      *     await client.templates.deleteTemplate("templateId")
      */
-    public async deleteTemplate(templateId: string, requestOptions?: Templates.RequestOptions): Promise<unknown> {
+    public async deleteTemplate(templateId: string, requestOptions?: Templates.RequestOptions): Promise<void> {
         const _response = await core.fetcher({
             url: urlJoin(
                 (await core.Supplier.get(this._options.baseUrl)) ??
@@ -287,7 +287,7 @@ export class Templates {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return _response.body;
+            return;
         }
 
         if (_response.error.reason === "status-code") {
@@ -323,7 +323,7 @@ export class Templates {
      * @example
      *     await client.templates.extractTemplateFiles("templateId")
      */
-    public async extractTemplateFiles(templateId: string, requestOptions?: Templates.RequestOptions): Promise<unknown> {
+    public async extractTemplateFiles(templateId: string, requestOptions?: Templates.RequestOptions): Promise<void> {
         const _response = await core.fetcher({
             url: urlJoin(
                 (await core.Supplier.get(this._options.baseUrl)) ??
@@ -346,7 +346,7 @@ export class Templates {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return _response.body;
+            return;
         }
 
         if (_response.error.reason === "status-code") {
@@ -598,7 +598,7 @@ export class Templates {
         templateId: string,
         request: PogodocApi.UploadTemplateIndexHtmlRequest,
         requestOptions?: Templates.RequestOptions,
-    ): Promise<unknown> {
+    ): Promise<void> {
         const _response = await core.fetcher({
             url: urlJoin(
                 (await core.Supplier.get(this._options.baseUrl)) ??
@@ -622,7 +622,7 @@ export class Templates {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return _response.body;
+            return;
         }
 
         if (_response.error.reason === "status-code") {

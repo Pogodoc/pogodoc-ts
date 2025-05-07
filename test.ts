@@ -13,20 +13,18 @@ const client = new PogodocClient({
 });
 
 async function main() {
-  //   const templateId = await client.saveTemplate({
-  //     path: templatePath,
-  //     title: "Invoice",
-  //     description: "Invoice template",
-  //     type: "html",
-  //     categories: ["invoice"],
-  //     sampleData: sampleData,
-  //   });
+  const templateId = await client.saveTemplate({
+    path: templatePath,
+    title: "Invoice",
+    description: "Invoice template",
+    type: "html",
+    categories: ["invoice"],
+    sampleData: sampleData,
+  });
 
-  //   console.log(templateId);
-
-  //   if (!templateId) {
-  //     throw new Error("Template ID is required");
-  //   }
+  if (!templateId) {
+    throw new Error("Template ID is required");
+  }
 
   const documentOutput = await client.generateDocument({
     templateId: "9c4ace0a-8d6f-4371-b455-38508f1f8ac2",
@@ -38,8 +36,6 @@ async function main() {
     },
   });
 
-  console.log(documentOutput);
-
   const updateTemplateId = await client.updateTemplate({
     path: templatePath,
     templateId: "9c4ace0a-8d6f-4371-b455-38508f1f8ac2",
@@ -49,8 +45,6 @@ async function main() {
     categories: ["invoice"],
     sampleData: sampleData,
   });
-
-  console.log(updateTemplateId);
 }
 
 main();
