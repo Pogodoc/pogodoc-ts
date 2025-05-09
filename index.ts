@@ -34,7 +34,6 @@ class PogodocClient extends PogodocApiClient {
   }: FileStreamProps & SaveTemplateMetadata) {
     const { presignedTemplateUploadUrl, jobId: templateId } =
       await this.templates.initializeTemplateCreation();
-
     await uploadToS3WithUrl(
       presignedTemplateUploadUrl,
       payload,
@@ -42,7 +41,8 @@ class PogodocClient extends PogodocApiClient {
       "application/zip"
     );
 
-    const resp = await this.templates.extractTemplateFiles(templateId);
+    await this.templates.extractTemplateFiles(templateId);
+
     const { pdfPreview, pngPreview } =
       await this.templates.generateTemplatePreviews(templateId, {
         type: metadata.type,
@@ -56,6 +56,7 @@ class PogodocClient extends PogodocApiClient {
         type: metadata.type,
         categories: metadata.categories,
         sampleData: metadata.sampleData,
+        sourceCode: metadata.sourceCode,
       },
       previewIds: {
         pngJobId: pngPreview.jobId,
@@ -114,6 +115,7 @@ class PogodocClient extends PogodocApiClient {
         type: metadata.type,
         categories: metadata.categories,
         sampleData: metadata.sampleData,
+        sourceCode: metadata.sourceCode,
       },
       previewIds: {
         pngJobId: pngPreview.jobId,
@@ -129,22 +131,19 @@ class PogodocClient extends PogodocApiClient {
     templateId,
     data,
     renderConfig,
+    shouldWaitForRenderCompletion,
   }: GenerateDocumentProps) {
     const initRequest: InitializeRenderJobRequest = {
       type: renderConfig.type,
       target: renderConfig.target,
       templateId,
+      formatOpts: renderConfig.formatOpts,
     };
-
-    if (renderConfig.formatOpts) {
-      initRequest.formatOpts = renderConfig.formatOpts;
-    }
 
     const initResponse = await this.documents.initializeRenderJob(initRequest);
 
     const dataString = JSON.stringify(data);
     const dataStream = Readable.from(dataString);
-    console.log("jobid", initResponse.jobId);
 
     if (initResponse.presignedDataUploadUrl) {
       await uploadToS3WithUrl(
@@ -164,18 +163,12 @@ class PogodocClient extends PogodocApiClient {
       );
     }
 
-    const startRenderJobRequest: StartRenderJobRequest = {
+    console.log(initResponse.jobId);
+
+    await this.documents.startRenderJob(initResponse.jobId, {
+      shouldWaitForRenderCompletion,
       uploadPresignedS3Url: renderConfig.personalUploadPresignedS3Url,
-    };
-
-    if (renderConfig.shouldWaitForRenderCompletion) {
-      startRenderJobRequest.shouldWaitForRenderCompletion = true;
-    }
-
-    await this.documents.startRenderJob(
-      initResponse.jobId,
-      startRenderJobRequest
-    );
+    });
 
     const results = await this.documents.getJobStatus(initResponse.jobId);
 

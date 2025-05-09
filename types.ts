@@ -15,20 +15,9 @@ export type GenerateDocumentProps = {
     target: RenderTarget;
     formatOpts?: InitializeRenderJobRequestFormatOpts;
     personalUploadPresignedS3Url?: string;
-    shouldWaitForRenderCompletion?: boolean;
   };
+  shouldWaitForRenderCompletion?: boolean;
   uploadPresignedS3Url?: string;
-};
-
-type TemplateInfo = {
-  categories: Categories;
-  title: string;
-  description: string;
-  sampleData: { [key: string]: string };
-  type: TemplateFormatType;
-  previewPng: string;
-  previewPdf: string;
-  sourceCode?: string;
 };
 
 export type Categories = ("invoice" | "mail" | "report" | "cv" | "other")[];
@@ -66,6 +55,7 @@ export type SaveTemplateMetadata = {
   sampleData: { [key: string]: any };
   type: TemplateFormatType;
   formatOpts?: FormatOptsType;
+  sourceCode?: string;
 };
 
 export type UpdateTemplateProps = SaveTemplateMetadata & {

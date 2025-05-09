@@ -27,13 +27,17 @@ async function main() {
   }
 
   const documentOutput = await client.generateDocument({
-    templateId: "9c4ace0a-8d6f-4371-b455-38508f1f8ac2",
+    templateId: templateId,
     data: sampleData,
     renderConfig: {
       type: "html",
       target: "pdf",
-      shouldWaitForRenderCompletion: true,
+      formatOpts: {
+        fromPage: 1,
+        toPage: 1,
+      },
     },
+    shouldWaitForRenderCompletion: true,
   });
 
   const updateTemplateId = await client.updateTemplate({
