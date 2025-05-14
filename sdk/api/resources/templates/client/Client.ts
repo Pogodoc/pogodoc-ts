@@ -318,12 +318,17 @@ export class Templates {
      * Extracts contents from an uploaded template ZIP file and stores individual files in the appropriate S3 storage structure.
      *
      * @param {string} templateId
+     * @param {PogodocApi.ExtractTemplateFilesRequest} request
      * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.templates.extractTemplateFiles("templateId")
+     *     await client.templates.extractTemplateFiles("templateId", undefined)
      */
-    public async extractTemplateFiles(templateId: string, requestOptions?: Templates.RequestOptions): Promise<void> {
+    public async extractTemplateFiles(
+        templateId: string,
+        request?: PogodocApi.ExtractTemplateFilesRequest,
+        requestOptions?: Templates.RequestOptions,
+    ): Promise<void> {
         const _response = await core.fetcher({
             url: urlJoin(
                 (await core.Supplier.get(this._options.baseUrl)) ??
@@ -331,7 +336,7 @@ export class Templates {
                     environments.PogodocApiEnvironment.Default,
                 `templates/${encodeURIComponent(templateId)}/unzip`,
             ),
-            method: "POST",
+            method: "PATCH",
             headers: {
                 Authorization: await this._getAuthorizationHeader(),
                 "X-Fern-Language": "JavaScript",
@@ -341,6 +346,12 @@ export class Templates {
             },
             contentType: "application/json",
             requestType: "json",
+            body:
+                request != null
+                    ? serializers.templates.extractTemplateFiles.Request.jsonOrThrow(request, {
+                          unrecognizedObjectKeys: "strip",
+                      })
+                    : undefined,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
@@ -364,7 +375,7 @@ export class Templates {
                 });
             case "timeout":
                 throw new errors.PogodocApiTimeoutError(
-                    "Timeout exceeded when calling POST /templates/{templateId}/unzip.",
+                    "Timeout exceeded when calling PATCH /templates/{templateId}/unzip.",
                 );
             case "unknown":
                 throw new errors.PogodocApiError({
