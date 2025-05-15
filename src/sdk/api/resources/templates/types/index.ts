@@ -8,7 +8,6 @@ export * from "./UpdateTemplateRequestTemplateInfoCategoriesItem";
 export * from "./UpdateTemplateRequestTemplateInfo";
 export * from "./UpdateTemplateRequestPreviewIds";
 export * from "./UpdateTemplateResponse";
-export * from "./ExtractTemplateFilesRequest";
 export * from "./GenerateTemplatePreviewsRequestType";
 export * from "./GenerateTemplatePreviewsRequestFormatOptsFormat";
 export * from "./GenerateTemplatePreviewsRequestFormatOpts";

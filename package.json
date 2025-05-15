@@ -1,17 +1,25 @@
 {
   "name": "pogodoc-ts",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "pogodoc typescript sdk",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.mjs"
+    },
+    "./types": "./dist/index.d.ts"
+  },
   "files": [
     "dist"
   ],
   "scripts": {
-    "test": "tsx test.ts",
+    "test": "tsx src/test.ts",
     "install-imports": "node ./install-imports.js",
-    "build": "rimraf dist && tsc -p tsconfig.json && copyfiles package.json dist"
+    "build": "rimraf dist && node build.js && tsc && copyfiles package.json dist"
   },
   "author": "",
   "license": "ISC",
@@ -19,18 +27,18 @@
     "@types/node": "^22.15.12",
     "@types/qs": "^6.9.18",
     "@types/readable-stream": "^4.0.18",
-    "rimraf": "^6.0.1",
-    "copyfiles": "^2.4.1"
+    "copyfiles": "^2.4.1",
+    "esbuild": "^0.25.4",
+    "dotenv": "^16.5.0",
+    "tsx": "^4.19.4",
+    "rimraf": "^6.0.1"
   },
   "dependencies": {
     "axios": "^1.9.0",
-    "dotenv": "^16.5.0",
     "js-base64": "^3.7.7",
     "node-fetch": "^3.3.2",
-    "path": "^0.12.7",
     "qs": "^6.14.0",
     "readable-stream": "^4.7.0",
-    "tsx": "^4.19.4",
     "url-join": "^5.0.0"
   }
 }

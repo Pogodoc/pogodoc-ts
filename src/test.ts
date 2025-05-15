@@ -1,4 +1,4 @@
-import PogodocClient from "./dist/index";
+import PogodocClient from ".";
 import dotenv from "dotenv";
 import fs from "fs";
 
