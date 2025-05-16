@@ -1,4 +1,4 @@
-export { type SaveCreatedTemplateRequest } from "./SaveCreatedTemplateRequest";
-export { type UpdateTemplateRequest } from "./UpdateTemplateRequest";
-export { type GenerateTemplatePreviewsRequest } from "./GenerateTemplatePreviewsRequest";
-export { type UploadTemplateIndexHtmlRequest } from "./UploadTemplateIndexHtmlRequest";
+export { type SaveCreatedTemplateRequest } from "./SaveCreatedTemplateRequest.js";
+export { type UpdateTemplateRequest } from "./UpdateTemplateRequest.js";
+export { type GenerateTemplatePreviewsRequest } from "./GenerateTemplatePreviewsRequest.js";
+export { type UploadTemplateIndexHtmlRequest } from "./UploadTemplateIndexHtmlRequest.js";

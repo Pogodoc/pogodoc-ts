@@ -1,5 +1,4 @@
-export * as PogodocApi from "./api";
-export { PogodocApiClient } from "./Client";
-export { PogodocApiEnvironment } from "./environments";
-export { PogodocApiError, PogodocApiTimeoutError } from "./errors";
-export * as serialization from "./serialization";
+export * as PogodocApi from "./api/index.js";
+export { PogodocApiClient } from "./Client.js";
+export { PogodocApiEnvironment } from "./environments.js";
+export { PogodocApiError, PogodocApiTimeoutError } from "./errors/index.js";

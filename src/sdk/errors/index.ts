@@ -1,2 +1,2 @@
-export { PogodocApiError } from "./PogodocApiError";
-export { PogodocApiTimeoutError } from "./PogodocApiTimeoutError";
+export { PogodocApiError } from "./PogodocApiError.js";
+export { PogodocApiTimeoutError } from "./PogodocApiTimeoutError.js";
