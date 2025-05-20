@@ -62,6 +62,14 @@ async function main() {
 
   console.log("documentOutput", documentOutput);
 
+  const documentOutput2 = await client.documents.startImmediateRender({
+    template: "<h1>Hello <%= name %></h1>",
+    data: { name: "Ferdzo" },
+    type: "html",
+    target: "pdf",
+  });
+
+  console.log("documentOutput2", documentOutput2);
   // const saveTemplate = await Promise.all(
   //   Array(50)
   //     .fill(0)
