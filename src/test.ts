@@ -22,9 +22,29 @@ async function main() {
     sampleData: sampleData,
   });
 
+  console.log("templateId", templateId);
+
   if (!templateId) {
     throw new Error("Template ID is required");
   }
+
+  const updateTemplateId = await client.updateTemplate({
+    path: templatePath,
+    templateId: "9c4ace0a-8d6f-4371-b455-38508f1f8ac2",
+    title: "Invoice",
+    description: "Invoice template",
+    type: "html",
+    categories: ["invoice"],
+    sampleData: sampleData,
+  });
+
+  console.log("updateTemplateId", updateTemplateId);
+
+  const presignedUrl = await client.templates.generatePresignedGetUrl(
+    templateId
+  );
+
+  console.log("presignedUrl", presignedUrl);
 
   const documentOutput = await client.generateDocument({
     templateId: "80f63a14-ac9f-4cb4-9bfa-70b38daf33a6",
@@ -40,7 +60,9 @@ async function main() {
     shouldWaitForRenderCompletion: true,
   });
 
-  // await Promise.all(
+  console.log("documentOutput", documentOutput);
+
+  // const saveTemplate = await Promise.all(
   //   Array(50)
   //     .fill(0)
   //     .map(async (_, index) => {
@@ -53,6 +75,8 @@ async function main() {
   //           categories: ["invoice"],
   //           sampleData: sampleData,
   //         });
+
+  //         console.log("Template:", templateId);
   //       } catch (error) {
   //         console.error(`Error generating document ${index}:`, error);
   //       }
@@ -65,33 +89,21 @@ async function main() {
   //     .map(async (_, index) => {
   //       try {
   //         const documentOutput = await client.generateDocument({
-  //           templateId: "80f63a14-ac9f-4cb4-9bfa-70b38daf33a6",
+  //           templateId: "656098fa-571b-42d3-be46-58c1c0020564",
   //           data: sampleData,
   //           renderConfig: {
   //             type: "html",
   //             target: "pdf",
-  //             formatOpts: {
-  //               fromPage: 1,
-  //               toPage: 1,
-  //             },
   //           },
   //           shouldWaitForRenderCompletion: true,
   //         });
+
+  //         console.log("Document:", documentOutput);
   //       } catch (error) {
   //         console.error(`Error generating document ${index}:`, error);
   //       }
   //     })
   // );
-
-  // const updateTemplateId = await client.updateTemplate({
-  //   path: templatePath,
-  //   templateId: "9c4ace0a-8d6f-4371-b455-38508f1f8ac2",
-  //   title: "Invoice",
-  //   description: "Invoice template",
-  //   type: "html",
-  //   categories: ["invoice"],
-  //   sampleData: sampleData,
-  // });
 }
 
 main();

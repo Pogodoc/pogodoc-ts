@@ -1,5 +1,5 @@
 import { Readable } from "stream";
-import { InitializeRenderJobRequestFormatOpts } from "./sdk/api";
+import { InitializeRenderJobRequest } from "./sdk/api";
 
 export type PogodocClientConstructorType = {
   token: string;
@@ -13,7 +13,7 @@ export type GenerateDocumentProps = {
   renderConfig: {
     type: TemplateFormatType;
     target: RenderTarget;
-    formatOpts?: InitializeRenderJobRequestFormatOpts;
+    formatOpts?: InitializeRenderJobRequest.FormatOpts;
     personalUploadPresignedS3Url?: string;
   };
   shouldWaitForRenderCompletion?: boolean;
