@@ -30,7 +30,7 @@ async function main() {
 
   const updateTemplateId = await client.updateTemplate({
     path: templatePath,
-    templateId: "9c4ace0a-8d6f-4371-b455-38508f1f8ac2",
+    templateId: "a43bd040-fc6f-4fce-a65b-913cf059c51c",
     title: "Invoice",
     description: "Invoice template",
     type: "html",
@@ -47,7 +47,7 @@ async function main() {
   console.log("presignedUrl", presignedUrl);
 
   const documentOutput = await client.generateDocument({
-    templateId: "80f63a14-ac9f-4cb4-9bfa-70b38daf33a6",
+    templateId: "a43bd040-fc6f-4fce-a65b-913cf059c51c",
     data: sampleData,
     renderConfig: {
       type: "html",
