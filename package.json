@@ -1,7 +1,16 @@
 {
-  "name": "pogodoc-ts",
+  "name": "pogodoc",
   "version": "0.0.4",
-  "description": "pogodoc typescript sdk",
+  "description": "Pogodoc SDK for TypeScript",
+  "keywords": [
+    "pogodoc",
+    "sdk",
+    "typescript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "github.com/Pogodoc/pogodoc-ts"
+  },
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
