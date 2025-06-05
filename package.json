@@ -19,7 +19,10 @@
   ],
   "scripts": {
     "test": "tsx src/test.ts",
-    "build": "rimraf dist && tsc --project tsconfig.json && copyfiles package.json dist"
+    "install-imports": "node ./install-imports.js",
+    "build": "rimraf dist && node build.js && tsc && copyfiles package.json dist",
+    "test2": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "author": "",
   "license": "ISC",
@@ -27,18 +30,24 @@
     "@types/node": "^22.15.12",
     "@types/qs": "^6.9.18",
     "@types/readable-stream": "^4.0.18",
+    "@types/validator": "^13.15.1",
+    "@vitest/coverage-v8": "^3.2.1",
     "copyfiles": "^2.4.1",
     "dotenv": "^16.5.0",
+    "esbuild": "^0.25.4",
+    "pdf-visual-diff": "^0.14.0",
     "rimraf": "^6.0.1",
     "tsx": "^4.19.4",
-    "typescript": "^5.8.3"
+    "vitest": "^3.2.0"
   },
   "dependencies": {
     "axios": "^1.9.0",
     "js-base64": "^3.7.7",
     "node-fetch": "^3.3.2",
+    "pdfjs-dist": "^5.3.31",
     "qs": "^6.14.0",
     "readable-stream": "^4.7.0",
-    "url-join": "^5.0.0"
+    "url-join": "^5.0.0",
+    "validator": "^13.15.15"
   }
 }
