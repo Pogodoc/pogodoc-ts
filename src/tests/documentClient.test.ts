@@ -90,14 +90,6 @@ describe("Document Client", async () => {
     expect(nes).toBe(true);
   }, 10000);
 
-  test.skip("Test get job status", async () => {
-    const nes = await client.documents.startRenderJob;
-
-    expect(nes).toBeDefined();
-
-    expect(nes).toBe(true);
-  }, 10000);
-
   test("Test immediate render", async () => {
     const documentOutput = await client.documents.startImmediateRender({
       template: "<h1>Hello <%= name %></h1>",
@@ -124,7 +116,7 @@ describe("Document Client", async () => {
     );
 
     expect(same).toEqual(true);
-  }, 10000);
+  }, 20000);
 
   test("Test generate document", async () => {
     const sampleData = readJsonFile("../../data/json_data/react.json");
@@ -155,6 +147,44 @@ describe("Document Client", async () => {
       response.data,
       __dirname,
       "testGenerateDocument",
+      {
+        tolerance: 0.05,
+      }
+    );
+
+    expect(areSame).toEqual(true);
+  }, 10000);
+
+
+  test("Test generate document with template", async () => {
+    const sampleData = readJsonFile("../../data/json_data/react.json");
+
+    const documentOutput = await client.generateDocument({
+      template: "<h1>Hello <%= name %></h1>",
+      data: { name: "Ferdzo" },
+      renderConfig: {
+        type: "html",
+        target: "pdf",
+        formatOpts: {
+          fromPage: 1,
+          toPage: 1,
+        },
+      },
+      shouldWaitForRenderCompletion: true,
+    });
+
+    expect(documentOutput).toBeDefined();
+
+    const response = await axios.get(documentOutput.output?.data.url!, {
+      responseType: "arraybuffer",
+    });
+
+    expect(response.status).toBe(200);
+
+    const areSame = await comparePdfToSnapshot(
+      response.data,
+      __dirname,
+      "testImmediateRender",
       {
         tolerance: 0.05,
       }

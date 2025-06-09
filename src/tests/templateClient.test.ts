@@ -98,35 +98,6 @@ describe("Template Client", async () => {
     ).toBe(true);
   });
 
-  test.skip("Test update template", async () => {
-    const sampleData = readJsonFile("../../data/json_data/react.json");
-    const templatePath = "../../data/templates/React-Demo-App.zip";
-
-    const updateTemplateId = await client.updateTemplate({
-      path: templatePath,
-      templateId: "3ba0b3fa-3bdf-4b92-948c-1d3dc7b964d1",
-      title: "Invoice",
-      description: "Invoice template",
-      type: "html",
-      categories: ["invoice"],
-      sampleData: sampleData,
-    });
-
-    expect(updateTemplateId).toBe(true);
-    // expect(response).toBeDefined();
-    // expect(response.jobId).toBeDefined();
-
-    // expect(validator.isUUID(response.jobId)).toBe(true);
-
-    // expect(response.presignedTemplateUploadUrl).toBeDefined();
-    // expect(
-    //   validator.isURL(response.presignedTemplateUploadUrl!, {
-    //     protocols: ["https"],
-    //     require_protocol: true,
-    //   })
-    // ).toBe(true);
-  }, 10000);
-
   test("Test save template", async () => {
     const createdTemplateId = await client.saveTemplate({
       path: templatePath,
@@ -222,6 +193,58 @@ describe("Template Client", async () => {
 
     await expect(fn).rejects.toThrow(PogodocApiError);
   });
+
+  test("Test generate presigned get Url", async () => {
+    const { presignedUrl } = await client.templates.generatePresignedGetUrl(
+      templateId
+    );
+    expect(presignedUrl).toBeDefined();
+    expect(
+      validator.isURL(presignedUrl, {
+        protocols: ["https"],
+        require_protocol: true,
+      })
+    ).toBe(true);
+  }, 10000);
+
+  test("Test get template Index Html", async () => {
+    const { templateIndex } = await client.templates.getTemplateIndexHtml(
+      templateId
+    );
+
+    expect(templateIndex).toBeDefined();
+    expect(typeof templateIndex).toBe("string");
+  }, 10000);
+
+  // test.only("Test get template Index Html", async () => {
+  //   const { templateIndex } = await client.templates.uploadTemplateIndexHtml(
+  //     templateId,
+  //     {
+  //       templateIndex: "<html><body>Test</body></html>",
+  //     }
+  //   );
+
+  //   expect(templateIndex).toBe(true);
+  //   expect(templateIndex).toBeDefined();
+  // }, 10000);
+
+  test("Test update template", async () => {
+    const sampleData = readJsonFile("../../data/json_data/react.json");
+    const templatePath = "../../data/templates/React-Demo-App.zip";
+
+    const updateTemplateId = await client.updateTemplate({
+      path: templatePath,
+      templateId,
+      title: "Invoice",
+      description: "Invoice template",
+      type: "html",
+      categories: ["invoice"],
+      sampleData: sampleData,
+    });
+
+    expect(updateTemplateId).toBeDefined();
+    expect(validator.isUUID(updateTemplateId)).toBe(true);
+  }, 30000);
 
   test("Test delete template", async () => {
     const deleteResponse = await client.templates.deleteTemplate(templateId);
