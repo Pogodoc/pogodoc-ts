@@ -10,14 +10,14 @@ export interface GenerateTemplatePreviewsResponse {
 export namespace GenerateTemplatePreviewsResponse {
     export interface PngPreview {
         /** URL of the rendered preview */
-        url?: string;
+        url: string;
         /** ID of the render job */
         jobId: string;
     }
 
     export interface PdfPreview {
         /** URL of the rendered preview */
-        url?: string;
+        url: string;
         /** ID of the render job */
         jobId: string;
     }
