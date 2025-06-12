@@ -3,6 +3,8 @@
  */
 
 export interface InitializeTemplateCreationResponse {
-    jobId: string;
+    /** ID of the template */
+    templateId: string;
+    /** Presigned URL to upload the template to S3 */
     presignedTemplateUploadUrl: string;
 }

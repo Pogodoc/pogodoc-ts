@@ -32,7 +32,7 @@ class PogodocClient extends PogodocApiClient {
     payloadLength,
     ...metadata
   }: FileStreamProps & SaveTemplateMetadata) {
-    const { presignedTemplateUploadUrl, jobId: templateId } =
+    const { presignedTemplateUploadUrl, templateId } =
       await this.templates.initializeTemplateCreation();
     await uploadToS3WithUrl(
       presignedTemplateUploadUrl,
@@ -89,7 +89,7 @@ class PogodocClient extends PogodocApiClient {
     payloadLength,
     ...metadata
   }: FileStreamProps & UpdateTemplateProps) {
-    const { presignedTemplateUploadUrl, jobId: contentId } =
+    const { presignedTemplateUploadUrl, templateId: contentId } =
       await this.templates.initializeTemplateCreation();
 
     await uploadToS3WithUrl(
@@ -107,6 +107,7 @@ class PogodocClient extends PogodocApiClient {
         data: metadata.sampleData,
       });
 
+    //TODO: rename to finalizeUpdateTemplate?
     await this.templates.updateTemplate(metadata.templateId, {
       contentId,
       templateInfo: {

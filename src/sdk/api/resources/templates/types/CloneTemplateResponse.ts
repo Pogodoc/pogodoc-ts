@@ -3,5 +3,6 @@
  */
 
 export interface CloneTemplateResponse {
+    /** ID of the new template */
     newTemplateId: string;
 }

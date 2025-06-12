@@ -10,14 +10,22 @@
  *     }
  */
 export interface InitializeRenderJobRequest {
+    /** Sample data for the template */
     data?: Record<string, unknown>;
+    /** Type of template to be rendered */
     type: InitializeRenderJobRequest.Type;
+    /** Type of output to be rendered */
     target: InitializeRenderJobRequest.Target;
+    /** ID of the template to be used */
     templateId?: string;
+    /** Format options for the rendered document */
     formatOpts?: InitializeRenderJobRequest.FormatOpts;
 }
 
 export namespace InitializeRenderJobRequest {
+    /**
+     * Type of template to be rendered
+     */
     export type Type = "docx" | "xlsx" | "pptx" | "ejs" | "html" | "latex" | "react";
     export const Type = {
         Docx: "docx",
@@ -28,6 +36,9 @@ export namespace InitializeRenderJobRequest {
         Latex: "latex",
         React: "react",
     } as const;
+    /**
+     * Type of output to be rendered
+     */
     export type Target = "pdf" | "html" | "docx" | "xlsx" | "pptx" | "png" | "jpg";
     export const Target = {
         Pdf: "pdf",
@@ -39,10 +50,14 @@ export namespace InitializeRenderJobRequest {
         Jpg: "jpg",
     } as const;
 
+    /**
+     * Format options for the rendered document
+     */
     export interface FormatOpts {
         fromPage?: number;
         toPage?: number;
         format?: FormatOpts.Format;
+        /** Selector to wait for to know when the page is loaded and can be saved as pdf, png, etc. */
         waitForSelector?: string;
     }
 

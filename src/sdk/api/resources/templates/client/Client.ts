@@ -13,7 +13,7 @@ export declare namespace Templates {
         environment?: core.Supplier<environments.PogodocApiEnvironment | string>;
         /** Specify a custom URL to connect the client to. */
         baseUrl?: core.Supplier<string>;
-        token?: core.Supplier<core.BearerToken | undefined>;
+        token: core.Supplier<core.BearerToken>;
     }
 
     export interface RequestOptions {
@@ -29,7 +29,7 @@ export declare namespace Templates {
 }
 
 export class Templates {
-    constructor(protected readonly _options: Templates.Options = {}) {}
+    constructor(protected readonly _options: Templates.Options) {}
 
     /**
      * Initializes template creation by generating a unique ID and providing a presigned URL for template ZIP upload. Sets unfinished tag for tracking incomplete templates.
@@ -281,7 +281,7 @@ export class Templates {
     /**
      * Deletes a template from Strapi and associated S3 storage. Removes all associated files and metadata.
      *
-     * @param {string} templateId
+     * @param {string} templateId - ID of the template to be deleted
      * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
@@ -290,14 +290,14 @@ export class Templates {
     public deleteTemplate(
         templateId: string,
         requestOptions?: Templates.RequestOptions,
-    ): core.HttpResponsePromise<void> {
+    ): core.HttpResponsePromise<PogodocApi.DeleteTemplateResponse> {
         return core.HttpResponsePromise.fromPromise(this.__deleteTemplate(templateId, requestOptions));
     }
 
     private async __deleteTemplate(
         templateId: string,
         requestOptions?: Templates.RequestOptions,
-    ): Promise<core.WithRawResponse<void>> {
+    ): Promise<core.WithRawResponse<PogodocApi.DeleteTemplateResponse>> {
         const _response = await core.fetcher({
             url: urlJoin(
                 (await core.Supplier.get(this._options.baseUrl)) ??
@@ -320,7 +320,7 @@ export class Templates {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: undefined, rawResponse: _response.rawResponse };
+            return { data: _response.body as PogodocApi.DeleteTemplateResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
@@ -353,7 +353,7 @@ export class Templates {
     /**
      * Extracts contents from an uploaded template ZIP file and stores individual files in the appropriate S3 storage structure.
      *
-     * @param {string} templateId
+     * @param {string} templateId - ID of the template to be used
      * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
@@ -425,7 +425,7 @@ export class Templates {
     /**
      * Creates both PNG and PDF preview files for template visualization. Generates previews in parallel and returns URLs for both formats.
      *
-     * @param {string} templateId
+     * @param {string} templateId - ID of the template to be used
      * @param {PogodocApi.GenerateTemplatePreviewsRequest} request
      * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
      *
@@ -511,7 +511,7 @@ export class Templates {
     /**
      * Generates a presigned URL for template access. Used for downloading template files from S3 storage.
      *
-     * @param {string} templateId
+     * @param {string} templateId - ID of the template that is being downloaded
      * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
@@ -586,7 +586,7 @@ export class Templates {
     /**
      * Retrieves the template index.html file from S3 storage. Used for rendering the template in the browser.
      *
-     * @param {string} templateId
+     * @param {string} templateId - ID of the template to be used
      * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
@@ -661,7 +661,7 @@ export class Templates {
     /**
      * Uploads the template index.html file to S3 storage. Used for rendering the template in the browser.
      *
-     * @param {string} templateId
+     * @param {string} templateId - ID of the template to be used
      * @param {PogodocApi.UploadTemplateIndexHtmlRequest} request
      * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
      *
@@ -741,7 +741,7 @@ export class Templates {
     /**
      * Creates a new template by duplicating an existing template's content and metadata. Includes copying preview files and template index.
      *
-     * @param {string} templateId
+     * @param {string} templateId - ID of the template to be used
      * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
@@ -810,12 +810,7 @@ export class Templates {
         }
     }
 
-    protected async _getAuthorizationHeader(): Promise<string | undefined> {
-        const bearer = await core.Supplier.get(this._options.token);
-        if (bearer != null) {
-            return `Bearer ${bearer}`;
-        }
-
-        return undefined;
+    protected async _getAuthorizationHeader(): Promise<string> {
+        return `Bearer ${await core.Supplier.get(this._options.token)}`;
     }
 }

@@ -9,5 +9,6 @@
  *     }
  */
 export interface UploadTemplateIndexHtmlRequest {
+    /** New index.html file of the template */
     templateIndex: string;
 }

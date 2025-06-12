@@ -24,20 +24,29 @@
 export interface UpdateTemplateRequest {
     templateInfo: UpdateTemplateRequest.TemplateInfo;
     previewIds: UpdateTemplateRequest.PreviewIds;
+    /** ID by which the new template content is saved */
     contentId: string;
 }
 
 export namespace UpdateTemplateRequest {
     export interface TemplateInfo {
+        /** Title of the template */
         title: string;
+        /** Description of the template */
         description: string;
+        /** Type of template to be rendered */
         type: TemplateInfo.Type;
+        /** Sample data for the template */
         sampleData: Record<string, unknown>;
         sourceCode?: string;
+        /** Categories of the template */
         categories: TemplateInfo.Categories.Item[];
     }
 
     export namespace TemplateInfo {
+        /**
+         * Type of template to be rendered
+         */
         export type Type = "docx" | "xlsx" | "pptx" | "ejs" | "html" | "latex" | "react";
         export const Type = {
             Docx: "docx",
@@ -63,7 +72,9 @@ export namespace UpdateTemplateRequest {
     }
 
     export interface PreviewIds {
+        /** ID of the job for the PNG preview */
         pngJobId: string;
+        /** ID of the job for the PDF preview */
         pdfJobId: string;
     }
 }

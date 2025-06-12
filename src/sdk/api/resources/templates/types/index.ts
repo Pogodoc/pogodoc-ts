@@ -1,5 +1,6 @@
 export * from "./InitializeTemplateCreationResponse.js";
 export * from "./UpdateTemplateResponse.js";
+export * from "./DeleteTemplateResponse.js";
 export * from "./GenerateTemplatePreviewsResponse.js";
 export * from "./GeneratePresignedGetUrlResponse.js";
 export * from "./GetTemplateIndexHtmlResponse.js";

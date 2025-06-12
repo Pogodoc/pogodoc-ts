@@ -3,5 +3,6 @@
  */
 
 export interface StartRenderJobResponse {
+    /** ID of the render job */
     jobId: string;
 }

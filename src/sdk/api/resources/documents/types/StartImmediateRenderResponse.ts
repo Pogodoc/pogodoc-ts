@@ -3,5 +3,6 @@
  */
 
 export interface StartImmediateRenderResponse {
+    /** URL of the rendered output */
     url: string;
 }

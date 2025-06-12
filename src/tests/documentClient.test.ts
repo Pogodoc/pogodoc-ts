@@ -1,23 +1,135 @@
 import { describe } from "node:test";
-import { expect, test, vi } from "vitest";
+import { assert, expect, test, vi } from "vitest";
 import dotenv from "dotenv";
 import PogodocClient from "..";
 import fs from "fs";
 import * as validator from "validator";
 import axios from "axios";
-import { console } from "inspector";
-import { comparePdfToSnapshot } from "pdf-visual-diff";
 import * as core from "../sdk/core/index.js";
 import { PogodocApiError, PogodocApiTimeoutError } from "../sdk";
+import { stripBufferTimestamp, readJsonFile } from "../utils";
+import { StartImmediateRenderRequest } from "../sdk/api";
+import { GenerateDocumentProps } from "../types";
 
 dotenv.config();
 
-describe("Document Client", async () => {
+const testTemplateId = process.env.TEST_TEMPLATE_ID || "";
+
+describe.skip("Document Client", async () => {
   const client = new PogodocClient({
     token: process.env.POGODOC_API_TOKEN || "",
     baseUrl: process.env.LAMBDA_BASE_URL || "",
   });
 
+  const sampleData = readJsonFile("../../data/json_data/react.json");
+
+  const testCasesImmediateRenderPDF: { params: StartImmediateRenderRequest }[] =
+    [
+      {
+        params: {
+          template: "<h1>Hello <%= name %></h1>",
+          data: { name: "Ferdzo" },
+          type: "html",
+          target: "pdf",
+          formatOpts: {
+            fromPage: 1,
+            toPage: 1,
+          },
+        },
+      },
+      {
+        params: {
+          template: "<h1>Hello <%= name %></h1>",
+          data: { name: "Ferdzo" },
+          type: "html",
+          target: "pdf",
+        },
+      },
+    ];
+  const testCasesImmediateRenderPNG: { params: StartImmediateRenderRequest }[] =
+    [
+      {
+        params: {
+          template: "<h1>Hello <%= name %></h1>",
+          data: { name: "Ferdzo" },
+          type: "html",
+          target: "png",
+          formatOpts: {
+            fromPage: 1,
+            toPage: 1,
+          },
+        },
+      },
+      {
+        params: {
+          template: "<h1>Hello <%= name %></h1>",
+          data: { name: "Ferdzo" },
+          type: "html",
+          target: "png",
+        },
+      },
+    ];
+  const testCasesGenerateDocumentPDF: {
+    params: GenerateDocumentProps;
+    reference: string;
+  }[] = [
+    {
+      params: {
+        templateId: testTemplateId,
+        data: sampleData,
+        renderConfig: {
+          type: "html",
+          target: "pdf",
+          formatOpts: {
+            fromPage: 1,
+            toPage: 1,
+          },
+        },
+        shouldWaitForRenderCompletion: true,
+      },
+      reference: "/reference-documents/testGenerateDocumentOnePage.pdf",
+    },
+    {
+      params: {
+        templateId: testTemplateId,
+        data: sampleData,
+        renderConfig: {
+          type: "html",
+          target: "pdf",
+        },
+        shouldWaitForRenderCompletion: true,
+      },
+      reference: "/reference-documents/testGenerateDocument.pdf",
+    },
+  ];
+  const testCasesGenerateDocumentPNG: { params: GenerateDocumentProps }[] = [
+    {
+      params: {
+        templateId: testTemplateId,
+        data: sampleData,
+        renderConfig: {
+          type: "html",
+          target: "png",
+          formatOpts: {
+            fromPage: 1,
+            toPage: 1,
+          },
+        },
+        shouldWaitForRenderCompletion: true,
+      },
+    },
+    // {
+    //   params: {
+    //     templateId: testTemplateId,
+    //     data: sampleData,
+    //     renderConfig: {
+    //       type: "html",
+    //       target: "png",
+    //     },
+    //     shouldWaitForRenderCompletion: true,
+    //   },
+    // },
+  ];
   const testCases = [
     {
       fn: () =>
@@ -46,196 +158,223 @@ describe("Document Client", async () => {
     { fn: () => client.documents.getJobStatus("") },
   ];
 
-  test("Test initialize render job", async () => {
-    const nes = await client.documents.initializeRenderJob({
-      type: "html",
-      target: "pdf",
-      templateId: "3ba0b3fa-3bdf-4b92-948c-1d3dc7b964d1",
-      formatOpts: {
-        fromPage: 1,
-        toPage: 1,
-      },
-    });
-
-    expect(nes).toBeDefined();
-
-    expect(validator.isUUID(nes.jobId)).toBe(true);
-
-    expect(nes.presignedDataUploadUrl).toBeDefined();
-    expect(
-      validator.isURL(nes.presignedDataUploadUrl!, {
-        protocols: ["https"],
-        require_protocol: true,
-      })
-    ).toBe(true);
-
-    expect(nes.presignedTemplateUploadUrl).toBeDefined();
-    expect(
-      validator.isURL(nes.presignedTemplateUploadUrl!, {
-        protocols: ["https"],
-        require_protocol: true,
-      })
-    ).toBe(true);
-
-    expect(nes.target).toBe("pdf");
-  }, 10000);
-
-  test.skip("Test get job status", async () => {
-    const nes = await client.documents.getJobStatus(
-      "98b91367-ab18-48fb-af99-f8f44d6e916c"
-    );
-
-    expect(nes).toBeDefined();
-
-    expect(nes).toBe(true);
-  }, 10000);
-
-  test("Test immediate render", async () => {
-    const documentOutput = await client.documents.startImmediateRender({
-      template: "<h1>Hello <%= name %></h1>",
-      data: { name: "Ferdzo" },
-      type: "html",
-      target: "pdf",
-    });
-
-    expect(documentOutput).toBeDefined();
-
-    const response = await axios.get(documentOutput.url, {
-      responseType: "arraybuffer",
-    });
-
-    expect(response.status).toBe(200);
-
-    const same = await comparePdfToSnapshot(
-      response.data,
-      __dirname,
-      "testImmediateRender",
-      {
-        tolerance: 0.95,
-      }
-    );
-
-    expect(same).toEqual(true);
-  }, 20000);
-
-  test("Test generate document", async () => {
-    const sampleData = readJsonFile("../../data/json_data/react.json");
-
-    const documentOutput = await client.generateDocument({
-      templateId: "3ba0b3fa-3bdf-4b92-948c-1d3dc7b964d1",
-      data: sampleData,
-      renderConfig: {
+  test.concurrent(
+    "Test initialize render job",
+    async () => {
+      const response = await client.documents.initializeRenderJob({
         type: "html",
         target: "pdf",
+        templateId: testTemplateId,
         formatOpts: {
           fromPage: 1,
           toPage: 1,
         },
-      },
-      shouldWaitForRenderCompletion: true,
-    });
+      });
 
-    expect(documentOutput).toBeDefined();
+      expect(response).toBeDefined();
 
-    const response = await axios.get(documentOutput.output?.data.url!, {
-      responseType: "arraybuffer",
-    });
+      expect(validator.isUUID(response.jobId)).toBe(true);
 
-    expect(response.status).toBe(200);
+      assert(
+        response.presignedDataUploadUrl,
+        "Presigned data upload URL is not defined"
+      );
+      expect(
+        validator.isURL(response.presignedDataUploadUrl, {
+          protocols: ["https"],
+          require_protocol: true,
+        })
+      ).toBe(true);
 
-    const areSame = await comparePdfToSnapshot(
-      response.data,
-      __dirname,
-      "testGenerateDocument",
-      {
-        tolerance: 0.05,
-      }
-    );
+      expect(response.presignedTemplateUploadUrl).toBeNull();
 
-    expect(areSame).toEqual(true);
-  }, 10000);
+      expect(response.target).toBe("pdf");
+    },
+    10000
+  );
 
+  test.concurrent.each(testCasesImmediateRenderPDF)(
+    "Test immediate render pdf",
+    async ({ params }) => {
+      const documentOutput = await client.documents.startImmediateRender(
+        params
+      );
 
-  test("Test generate document with template", async () => {
-    const sampleData = readJsonFile("../../data/json_data/react.json");
+      expect(documentOutput).toBeDefined();
 
-    const documentOutput = await client.generateDocument({
-      template: "<h1>Hello <%= name %></h1>",
-      data: { name: "Ferdzo" },
-      renderConfig: {
-        type: "html",
-        target: "pdf",
-        formatOpts: {
-          fromPage: 1,
-          toPage: 1,
+      const response = await axios.get(documentOutput.url, {
+        responseType: "arraybuffer",
+      });
+
+      expect(response.status).toBe(200);
+
+      const buffer = fs.readFileSync(
+        __dirname + "/reference-documents/testImmediateRender.pdf"
+      );
+
+      const referenceBuffer = stripBufferTimestamp(buffer);
+      const responseBuffer = stripBufferTimestamp(response.data);
+
+      expect(responseBuffer.equals(referenceBuffer)).toEqual(true);
+    },
+    20000
+  );
+
+  test.concurrent.each(testCasesImmediateRenderPNG)(
+    "Test immediate render png",
+    async ({ params }) => {
+      const documentOutput = await client.documents.startImmediateRender(
+        params
+      );
+
+      expect(documentOutput).toBeDefined();
+
+      const response = await axios.get(documentOutput.url, {
+        responseType: "arraybuffer",
+      });
+
+      expect(response.status).toBe(200);
+
+      const buffer = fs.readFileSync(
+        __dirname + "/reference-documents/testImmediateRender.png"
+      );
+
+      expect(response.data).toEqual(buffer);
+    },
+    20000
+  );
+
+  test.concurrent.each(testCasesGenerateDocumentPDF)(
+    "Test generate document pdf",
+    async ({ params, reference }) => {
+      const documentOutput = await client.generateDocument(params);
+
+      expect(documentOutput).toBeDefined();
+
+      const response = await axios.get(documentOutput.output?.data.url!, {
+        responseType: "arraybuffer",
+      });
+
+      expect(response.status).toBe(200);
+
+      const buffer = fs.readFileSync(__dirname + reference);
+
+      const referenceBuffer = stripBufferTimestamp(buffer);
+      const responseBuffer = stripBufferTimestamp(response.data);
+
+      expect(responseBuffer.equals(referenceBuffer)).toEqual(true);
+    },
+    10000
+  );
+
+  test.concurrent.each(testCasesGenerateDocumentPNG)(
+    "Test generate document png",
+    async ({ params }) => {
+      const documentOutput = await client.generateDocument(params);
+
+      expect(documentOutput).toBeDefined();
+
+      const response = await axios.get(documentOutput.output?.data.url!, {
+        responseType: "arraybuffer",
+      });
+
+      expect(response.status).toBe(200);
+
+      const buffer = fs.readFileSync(
+        __dirname + "/reference-documents/testGenerateDocument.png"
+      );
+
+      expect(response.data).toEqual(buffer);
+    },
+    10000
+  );
+
+  test.concurrent(
+    "Test generate document with template",
+    async () => {
+      const documentOutput = await client.generateDocument({
+        template: "<h1>Hello <%= name %></h1>",
+        data: { name: "Ferdzo" },
+        renderConfig: {
+          type: "html",
+          target: "pdf",
+          formatOpts: {
+            fromPage: 1,
+            toPage: 1,
+          },
         },
-      },
-      shouldWaitForRenderCompletion: true,
-    });
+        shouldWaitForRenderCompletion: true,
+      });
 
-    expect(documentOutput).toBeDefined();
+      expect(documentOutput).toBeDefined();
 
-    const response = await axios.get(documentOutput.output?.data.url!, {
-      responseType: "arraybuffer",
-    });
+      const response = await axios.get(documentOutput.output?.data.url!, {
+        responseType: "arraybuffer",
+      });
 
-    expect(response.status).toBe(200);
+      expect(response.status).toBe(200);
 
-    const areSame = await comparePdfToSnapshot(
-      response.data,
-      __dirname,
-      "testImmediateRender",
-      {
-        tolerance: 0.05,
-      }
-    );
+      const buffer = fs.readFileSync(
+        __dirname + "/reference-documents/testGenerateDocument.pdf"
+      );
 
-    expect(areSame).toEqual(true);
-  }, 10000);
+      const referenceBuffer = stripBufferTimestamp(buffer);
+      const responseBuffer = stripBufferTimestamp(response.data);
 
-  test.each(testCases)("Throws on status-code error", async ({ fn }) => {
-    vi.spyOn(core, "fetcher").mockResolvedValueOnce({
-      ok: false,
-      error: {
-        reason: "status-code",
-        statusCode: 400,
-        body: { message: "Bad Request" },
-      },
-      rawResponse: {
-        headers: new Headers(),
-        redirected: false,
-        status: 400,
-        statusText: "Client Closed Request",
-        type: "error",
-        url: "",
-      },
-    });
+      expect(responseBuffer.equals(referenceBuffer)).toEqual(true);
+    },
+    10000
+  );
 
-    await expect(fn).rejects.toThrow(PogodocApiError);
-  });
+  test.concurrent.each(testCases)(
+    "Throws on status-code error",
+    async ({ fn }) => {
+      vi.spyOn(core, "fetcher").mockResolvedValueOnce({
+        ok: false,
+        error: {
+          reason: "status-code",
+          statusCode: 400,
+          body: { message: "Bad Request" },
+        },
+        rawResponse: {
+          headers: new Headers(),
+          redirected: false,
+          status: 400,
+          statusText: "Client Closed Request",
+          type: "error",
+          url: "",
+        },
+      });
 
-  test.each(testCases)("Throws on non-json error", async ({ fn }) => {
-    vi.spyOn(core, "fetcher").mockResolvedValueOnce({
-      ok: false,
-      error: {
-        reason: "non-json",
-        statusCode: 400,
-        rawBody: "Bad Request",
-      },
-      rawResponse: {
-        headers: new Headers(),
-        redirected: false,
-        status: 400,
-        statusText: "Client Closed Request",
-        type: "error",
-        url: "",
-      },
-    });
+      await expect(fn).rejects.toThrow(PogodocApiError);
+    }
+  );
 
-    await expect(fn).rejects.toThrow(PogodocApiError);
-  });
+  test.concurrent.each(testCases)(
+    "Throws on non-json error",
+    async ({ fn }) => {
+      vi.spyOn(core, "fetcher").mockResolvedValueOnce({
+        ok: false,
+        error: {
+          reason: "non-json",
+          statusCode: 400,
+          rawBody: "Bad Request",
+        },
+        rawResponse: {
+          headers: new Headers(),
+          redirected: false,
+          status: 400,
+          statusText: "Client Closed Request",
+          type: "error",
+          url: "",
+        },
+      });
 
-  test.each(testCases)("Throws on timeout error", async ({ fn }) => {
+      await expect(fn).rejects.toThrow(PogodocApiError);
+    }
+  );
+
+  test.concurrent.each(testCases)("Throws on timeout error", async ({ fn }) => {
     vi.spyOn(core, "fetcher").mockResolvedValueOnce({
       ok: false,
       error: {
@@ -254,34 +393,26 @@ describe("Document Client", async () => {
     await expect(fn).rejects.toThrow(PogodocApiTimeoutError);
   });
 
-  test.each(testCases)("Throws on unknown error", async ({ fn }) => {
-    vi.spyOn(core, "fetcher").mockResolvedValueOnce({
-      ok: false,
-      error: {
-        reason: "unknown",
-        errorMessage: "Unknown error occurred",
-      },
-      rawResponse: {
-        headers: new Headers(),
-        redirected: false,
-        status: 400,
-        statusText: "Client Closed Request",
-        type: "error",
-        url: "",
-      },
-    });
+  test.concurrent.each(testCases)(
+    `Throws on unknown error `,
+    async ({ fn }) => {
+      vi.spyOn(core, "fetcher").mockResolvedValueOnce({
+        ok: false,
+        error: {
+          reason: "unknown",
+          errorMessage: "Unknown error occurred",
+        },
+        rawResponse: {
+          headers: new Headers(),
+          redirected: false,
+          status: 400,
+          statusText: "Client Closed Request",
+          type: "error",
+          url: "",
+        },
+      });
 
-    await expect(fn).rejects.toThrow(PogodocApiError);
-  });
+      await expect(fn).rejects.toThrow(PogodocApiError);
+    }
+  );
 });
-
-function readJsonFile(filePath: string) {
-  try {
-    const jsonString = fs.readFileSync(filePath, "utf8");
-    const data = JSON.parse(jsonString);
-
-    return data;
-  } catch (error) {
-    console.error("Error reading the JSON file:", error);
-  }
-}

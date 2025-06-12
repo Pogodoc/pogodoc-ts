@@ -3,8 +3,11 @@
  */
 
 export interface GetJobStatusResponse {
+    /** Type of template to be rendered */
     type: GetJobStatusResponse.Type;
+    /** ID of the render job */
     jobId: string;
+    /** Type of output to be rendered */
     target: GetJobStatusResponse.Target;
     output?: GetJobStatusResponse.Output;
     success?: boolean;
@@ -12,6 +15,9 @@ export interface GetJobStatusResponse {
 }
 
 export namespace GetJobStatusResponse {
+    /**
+     * Type of template to be rendered
+     */
     export type Type = "docx" | "xlsx" | "pptx" | "ejs" | "html" | "latex" | "react";
     export const Type = {
         Docx: "docx",
@@ -22,6 +28,9 @@ export namespace GetJobStatusResponse {
         Latex: "latex",
         React: "react",
     } as const;
+    /**
+     * Type of output to be rendered
+     */
     export type Target = "pdf" | "html" | "docx" | "xlsx" | "pptx" | "png" | "jpg";
     export const Target = {
         Pdf: "pdf",
@@ -40,10 +49,12 @@ export namespace GetJobStatusResponse {
 
     export namespace Output {
         export interface Data {
+            /** URL of the rendered output */
             url: string;
         }
 
         export interface Metadata {
+            /** Time taken to render the output */
             renderTime: number;
         }
     }

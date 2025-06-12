@@ -18,10 +18,10 @@
     "dist"
   ],
   "scripts": {
-    "test": "tsx src/test.ts",
+    "function-test": "tsx src/test.ts",
     "install-imports": "node ./install-imports.js",
     "build": "rimraf dist && node build.js && tsc && copyfiles package.json dist",
-    "test2": "vitest",
+    "test": "vitest",
     "coverage": "vitest run --coverage"
   },
   "author": "",

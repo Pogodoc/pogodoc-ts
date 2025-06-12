@@ -23,5 +23,13 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "json", "html"],
     },
+    printConsoleTrace: true,
+    disableConsoleIntercept: true,
+    onConsoleLog(log: string, type: "stdout" | "stderr"): false | void {
+      console.log("log in test: ", log);
+      if (log === "message from third party library" && type === "stdout") {
+        return false;
+      }
+    },
   },
 });

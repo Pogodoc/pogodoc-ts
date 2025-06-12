@@ -3,5 +3,6 @@
  */
 
 export interface GeneratePresignedGetUrlResponse {
+    /** Presigned URL to get the template */
     presignedUrl: string;
 }

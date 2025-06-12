@@ -13,7 +13,7 @@ export declare namespace Documents {
         environment?: core.Supplier<environments.PogodocApiEnvironment | string>;
         /** Specify a custom URL to connect the client to. */
         baseUrl?: core.Supplier<string>;
-        token?: core.Supplier<core.BearerToken | undefined>;
+        token: core.Supplier<core.BearerToken>;
     }
 
     export interface RequestOptions {
@@ -29,7 +29,7 @@ export declare namespace Documents {
 }
 
 export class Documents {
-    constructor(protected readonly _options: Documents.Options = {}) {}
+    constructor(protected readonly _options: Documents.Options) {}
 
     /**
      * Creates a new render job with a unique ID, sets up S3 storage for template and data files, and generates presigned upload URLs if needed. Requires subscription check.
@@ -185,92 +185,6 @@ export class Documents {
     }
 
     /**
-     * Generates a preview by creating a single-page render job, processing it immediately, and returning the output URL. Used for template visualization.
-     *
-     * @param {PogodocApi.GenerateDocumentPreviewRequest} request
-     * @param {Documents.RequestOptions} requestOptions - Request-specific configuration.
-     *
-     * @example
-     *     await client.documents.generateDocumentPreview({
-     *         templateId: "templateId",
-     *         type: "docx",
-     *         data: {
-     *             "key": "value"
-     *         }
-     *     })
-     */
-    public generateDocumentPreview(
-        request: PogodocApi.GenerateDocumentPreviewRequest,
-        requestOptions?: Documents.RequestOptions,
-    ): core.HttpResponsePromise<PogodocApi.GenerateDocumentPreviewResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__generateDocumentPreview(request, requestOptions));
-    }
-
-    private async __generateDocumentPreview(
-        request: PogodocApi.GenerateDocumentPreviewRequest,
-        requestOptions?: Documents.RequestOptions,
-    ): Promise<core.WithRawResponse<PogodocApi.GenerateDocumentPreviewResponse>> {
-        const { templateId, ..._body } = request;
-        const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
-        _queryParams["templateId"] = templateId;
-        const _response = await core.fetcher({
-            url: urlJoin(
-                (await core.Supplier.get(this._options.baseUrl)) ??
-                    (await core.Supplier.get(this._options.environment)) ??
-                    environments.PogodocApiEnvironment.Default,
-                "documents/render-preview",
-            ),
-            method: "POST",
-            headers: {
-                Authorization: await this._getAuthorizationHeader(),
-                "X-Fern-Language": "JavaScript",
-                "X-Fern-Runtime": core.RUNTIME.type,
-                "X-Fern-Runtime-Version": core.RUNTIME.version,
-                ...requestOptions?.headers,
-            },
-            contentType: "application/json",
-            queryParameters: _queryParams,
-            requestType: "json",
-            body: _body,
-            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
-            maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
-        });
-        if (_response.ok) {
-            return {
-                data: _response.body as PogodocApi.GenerateDocumentPreviewResponse,
-                rawResponse: _response.rawResponse,
-            };
-        }
-
-        if (_response.error.reason === "status-code") {
-            throw new errors.PogodocApiError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
-        }
-
-        switch (_response.error.reason) {
-            case "non-json":
-                throw new errors.PogodocApiError({
-                    statusCode: _response.error.statusCode,
-                    body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
-                });
-            case "timeout":
-                throw new errors.PogodocApiTimeoutError(
-                    "Timeout exceeded when calling POST /documents/render-preview.",
-                );
-            case "unknown":
-                throw new errors.PogodocApiError({
-                    message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
-                });
-        }
-    }
-
-    /**
      * Combines initialization and rendering in one step. Creates a job, uploads template/data directly, starts rendering, and adds the document to Strapi. Requires subscription check.
      *
      * @param {PogodocApi.StartImmediateRenderRequest} request
@@ -355,7 +269,7 @@ export class Documents {
     /**
      * Fetches detailed job information from S3 storage including job status, template ID, target format, and output details if available.
      *
-     * @param {string} jobId
+     * @param {string} jobId - ID of the render job
      * @param {Documents.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
@@ -422,12 +336,7 @@ export class Documents {
         }
     }
 
-    protected async _getAuthorizationHeader(): Promise<string | undefined> {
-        const bearer = await core.Supplier.get(this._options.token);
-        if (bearer != null) {
-            return `Bearer ${bearer}`;
-        }
-
-        return undefined;
+    protected async _getAuthorizationHeader(): Promise<string> {
+        return `Bearer ${await core.Supplier.get(this._options.token)}`;
     }
 }

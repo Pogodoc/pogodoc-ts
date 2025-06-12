@@ -12,12 +12,18 @@
  *     }
  */
 export interface GenerateTemplatePreviewsRequest {
+    /** Type of template to be rendered */
     type: GenerateTemplatePreviewsRequest.Type;
+    /** Sample data for the template */
     data: Record<string, unknown>;
+    /** Format options for the rendered document */
     formatOpts?: GenerateTemplatePreviewsRequest.FormatOpts;
 }
 
 export namespace GenerateTemplatePreviewsRequest {
+    /**
+     * Type of template to be rendered
+     */
     export type Type = "docx" | "xlsx" | "pptx" | "ejs" | "html" | "latex" | "react";
     export const Type = {
         Docx: "docx",
@@ -29,10 +35,14 @@ export namespace GenerateTemplatePreviewsRequest {
         React: "react",
     } as const;
 
+    /**
+     * Format options for the rendered document
+     */
     export interface FormatOpts {
         fromPage?: number;
         toPage?: number;
         format?: FormatOpts.Format;
+        /** Selector to wait for to know when the page is loaded and can be saved as pdf, png, etc. */
         waitForSelector?: string;
     }
 

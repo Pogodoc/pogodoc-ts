@@ -13,15 +13,24 @@
  *     }
  */
 export interface StartImmediateRenderRequest {
+    /** Sample data for the template */
     data: Record<string, unknown>;
+    /** Type of template to be rendered */
     type: StartImmediateRenderRequest.Type;
+    /** Type of output to be rendered */
     target: StartImmediateRenderRequest.Target;
+    /** ID of the template to be used */
     templateId?: string;
+    /** Format options for the rendered document */
     formatOpts?: StartImmediateRenderRequest.FormatOpts;
+    /** index.html or ejs file of the template as a string */
     template?: string;
 }
 
 export namespace StartImmediateRenderRequest {
+    /**
+     * Type of template to be rendered
+     */
     export type Type = "docx" | "xlsx" | "pptx" | "ejs" | "html" | "latex" | "react";
     export const Type = {
         Docx: "docx",
@@ -32,6 +41,9 @@ export namespace StartImmediateRenderRequest {
         Latex: "latex",
         React: "react",
     } as const;
+    /**
+     * Type of output to be rendered
+     */
     export type Target = "pdf" | "html" | "docx" | "xlsx" | "pptx" | "png" | "jpg";
     export const Target = {
         Pdf: "pdf",
@@ -43,10 +55,14 @@ export namespace StartImmediateRenderRequest {
         Jpg: "jpg",
     } as const;
 
+    /**
+     * Format options for the rendered document
+     */
     export interface FormatOpts {
         fromPage?: number;
         toPage?: number;
         format?: FormatOpts.Format;
+        /** Selector to wait for to know when the page is loaded and can be saved as pdf, png, etc. */
         waitForSelector?: string;
     }
 
