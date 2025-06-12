@@ -192,12 +192,12 @@ describe("Template Client", async () => {
   test("Test updateTemplate", async () => {
     const updateTemplateFromFileStreamSpy = vi
       .spyOn(client, "updateTemplateFromFileStream")
-      .mockResolvedValue("template-id");
+      .mockResolvedValue(callParams.templateId);
 
     const updateTemplateSpy = vi.spyOn(client, "updateTemplate");
 
     await client.updateTemplate({
-      templateId: callParams.templateId,
+      templateId: callParams.oldTemplateId,
       path: callParams.templatePath,
       title: callParams.title,
       description: callParams.description,

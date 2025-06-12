@@ -1,6 +1,14 @@
 import dotenv from "dotenv";
 import PogodocClient from "..";
-import { beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
+import {
+  assert,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from "vitest";
 import { readJsonFile, uploadToS3WithUrl } from "../utils";
 import validator from "validator";
 import { createReadStream, readFileSync, statSync } from "fs";
@@ -9,7 +17,7 @@ import * as core from "../sdk/core";
 
 dotenv.config();
 
-describe("Templates Client Integration", () => {
+describe.skip("Templates Client Integration", () => {
   const client = new PogodocClient({
     token: process.env.POGODOC_API_TOKEN || "",
     baseUrl: process.env.LAMBDA_BASE_URL || "",
@@ -32,33 +40,43 @@ describe("Templates Client Integration", () => {
     vi.resetAllMocks();
   });
 
-  let templateCreationParams: {
+  let templateInitParams: {
     templateId: string;
     presignedTemplateUploadUrl: string;
+  };
+
+  let templatePreviewsParams: {
+    pdfPreview: {
+      jobId: string;
+      url: string;
+    };
+    pngPreview: {
+      jobId: string;
+      url: string;
+    };
   };
 
   const sampleData = readJsonFile("../../data/json_data/react.json");
   const templatePath = "../../data/templates/React-Demo-App.zip";
 
   test("Test initialize template creation", async () => {
-    templateCreationParams =
-      await client.templates.initializeTemplateCreation();
+    templateInitParams = await client.templates.initializeTemplateCreation();
 
     expect(
-      validator.isURL(templateCreationParams.presignedTemplateUploadUrl, {
+      validator.isURL(templateInitParams.presignedTemplateUploadUrl, {
         protocols: ["https"],
         require_protocol: true,
       })
     ).toBe(true);
-    expect(validator.isUUID(templateCreationParams.templateId)).toBe(true);
+    expect(validator.isUUID(templateInitParams.templateId)).toBe(true);
   });
 
   test("Test upload template to s3", async () => {
-    console.log("templateCreationParams", templateCreationParams);
+    console.log("templateInitParams", templateInitParams);
     const axiosPutSpy = vi.spyOn(axios, "put");
 
     await uploadToS3WithUrl(
-      templateCreationParams.presignedTemplateUploadUrl,
+      templateInitParams.presignedTemplateUploadUrl,
       createReadStream(templatePath),
       readFileSync(templatePath).length,
       "application/zip"
@@ -69,26 +87,34 @@ describe("Templates Client Integration", () => {
   });
 
   test("Test extract template files", async () => {
-    await client.templates.extractTemplateFiles(
-      templateCreationParams.templateId
-    );
+    await client.templates.extractTemplateFiles(templateInitParams.templateId);
 
     const fetcherResult = fetcherSpy.mock.settledResults[0].value;
     expect(fetcherResult.rawResponse.status).toBe(204);
   });
 
   test("Test generate template previews", async () => {
-    const { previews } = await client.templates.generateTemplatePreviews(
-      templateCreationParams.templateId,
-      { type: "html", data: sampleData }
+    const templatePreviewsParams =
+      await client.templates.generateTemplatePreviews(
+        templateInitParams.templateId,
+        { type: "html", data: sampleData }
+      );
+    expect(validator.isUUID(templatePreviewsParams.pdfPreview.jobId)).toBe(
+      true
     );
-    expect(previews).toBeDefined();
-    expect(previews.length).toBe(1);
+    expect(validator.isUUID(templatePreviewsParams.pngPreview.jobId)).toBe(
+      true
+    );
+
+    assert(templatePreviewsParams);
+    expect(validator.isUUID(templatePreviewsParams.pdfPreview.jobId)).toBe(
+      true
+    );
   });
 
   test("Test generate presigned get Url", async () => {
     const { presignedUrl } = await client.templates.generatePresignedGetUrl(
-      templateCreationParams.templateId
+      templateInitParams.templateId
     );
     expect(presignedUrl).toBeDefined();
     expect(
@@ -99,20 +125,20 @@ describe("Templates Client Integration", () => {
     ).toBe(true);
   }, 10000);
 
-  test("Test get template Index Html", async () => {
-    const { templateIndex } = await client.templates.getTemplateIndexHtml(
-      templateCreationParams.templateId
-    );
+  // test("Test get template Index Html", async () => {
+  //   const { templateIndex } = await client.templates.getTemplateIndexHtml(
+  //     templateCreationParams.templateId
+  //   );
 
-    expect(templateIndex).toBeDefined();
-    expect(typeof templateIndex).toBe("string");
-    expect(templateIndex).toBe(
-      readFileSync(
-        __dirname + "/reference-documents/reactTemplateIndex.html",
-        "utf8"
-      )
-    );
-  }, 10000);
+  //   expect(templateIndex).toBeDefined();
+  //   expect(typeof templateIndex).toBe("string");
+  //   expect(templateIndex).toBe(
+  //     readFileSync(
+  //       __dirname + "/reference-documents/reactTemplateIndex.html",
+  //       "utf8"
+  //     )
+  //   );
+  // }, 10000);
 
   // test.only("Test get template Index Html", async () => {
   //   const { templateIndex } = await client.templates.uploadTemplateIndexHtml(

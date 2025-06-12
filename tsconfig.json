@@ -10,5 +10,5 @@
     "skipLibCheck": true,
     "outDir": "dist",
   },
-  "exclude": ["dist", "src/test.ts", "node_modules", "**/*.spec.ts", ".env"]
+  "exclude": ["dist", "src/test.ts", "node_modules", "**/*.spec.ts", ".env", "src/tests"]
 }
