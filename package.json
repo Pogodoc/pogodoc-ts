@@ -1,6 +1,6 @@
 {
   "name": "@pogodoc/sdk",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Pogodoc SDK for TypeScript",
   "keywords": [
     "pogodoc",
@@ -19,8 +19,7 @@
   ],
   "scripts": {
     "test": "tsx src/test.ts",
-    "install-imports": "node ./install-imports.js",
-    "build": "rimraf dist && tsc --project tsconfig.full.json && copyfiles package.json dist"
+    "build": "rimraf dist && tsc --project tsconfig.json && copyfiles package.json dist"
   },
   "author": "",
   "license": "ISC",
