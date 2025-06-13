@@ -1,5 +1,5 @@
 {
-  "name": "pogodoc",
+  "name": "@pogodoc/sdk",
   "version": "0.0.4",
   "description": "Pogodoc SDK for TypeScript",
   "keywords": [
@@ -11,24 +11,16 @@
     "type": "git",
     "url": "github.com/Pogodoc/pogodoc-ts"
   },
-  "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "require": "./dist/index.cjs",
-      "import": "./dist/index.mjs"
-    },
-    "./types": "./dist/index.d.ts"
-  },
+  "type": "commonjs",
+  "main": "./index.js",
+  "types": "./index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
     "test": "tsx src/test.ts",
     "install-imports": "node ./install-imports.js",
-    "build": "rimraf dist && node build.js && tsc && copyfiles package.json dist"
+    "build": "rimraf dist && tsc --project tsconfig.full.json && copyfiles package.json dist"
   },
   "author": "",
   "license": "ISC",
@@ -37,10 +29,10 @@
     "@types/qs": "^6.9.18",
     "@types/readable-stream": "^4.0.18",
     "copyfiles": "^2.4.1",
-    "esbuild": "^0.25.4",
     "dotenv": "^16.5.0",
+    "rimraf": "^6.0.1",
     "tsx": "^4.19.4",
-    "rimraf": "^6.0.1"
+    "typescript": "^5.8.3"
   },
   "dependencies": {
     "axios": "^1.9.0",
