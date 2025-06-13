@@ -1,6 +1,6 @@
 {
   "name": "@pogodoc/sdk",
-  "version": "0.0.5",
+  "version": "0.7.1",
   "description": "Pogodoc SDK for TypeScript",
   "keywords": [
     "pogodoc",
