@@ -16,6 +16,7 @@
     "node_modules",
     "**/*.spec.ts",
     ".env",
-    "src/tests"
+    "src/tests",
+    "vitest.config.ts"
   ]
 }

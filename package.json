@@ -1,6 +1,6 @@
 {
   "name": "@pogodoc/sdk",
-  "version": "0.7.4",
+  "version": "0.7.9",
   "description": "Pogodoc SDK for TypeScript",
   "keywords": [
     "pogodoc",
@@ -14,11 +14,8 @@
   "type": "commonjs",
   "main": "./index.js",
   "types": "./index.d.ts",
-  "files": [
-    "dist"
-  ],
   "scripts": {
-    "publish": "npm publish ./dist",
+    "function-test": "tsx src/test.ts",
     "build": "rimraf dist && tsc --project tsconfig.json && copyfiles package.json dist",
     "test": "vitest",
     "coverage": "vitest run --coverage"
@@ -36,6 +33,7 @@
     "dotenv": "^16.5.0",
     "esbuild": "^0.25.4",
     "rimraf": "^6.0.1",
+    "validator": "^13.15.15",
     "tsx": "^4.19.4",
     "vitest": "^3.2.0"
   },
@@ -45,7 +43,6 @@
     "node-fetch": "^3.3.2",
     "qs": "^6.14.0",
     "readable-stream": "^4.7.0",
-    "url-join": "^4.0.0",
-    "validator": "^13.15.15"
+    "url-join": "^4.0.0"
   }
 }
