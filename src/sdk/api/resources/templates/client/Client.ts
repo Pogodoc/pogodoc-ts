@@ -9,880 +9,808 @@ import urlJoin from "url-join";
 import * as errors from "../../../../errors/index.js";
 
 export declare namespace Templates {
-  export interface Options {
-    environment?: core.Supplier<environments.PogodocApiEnvironment | string>;
-    /** Specify a custom URL to connect the client to. */
-    baseUrl?: core.Supplier<string>;
-    token: core.Supplier<core.BearerToken>;
-  }
+    export interface Options {
+        environment?: core.Supplier<environments.PogodocApiEnvironment | string>;
+        /** Specify a custom URL to connect the client to. */
+        baseUrl?: core.Supplier<string>;
+        token: core.Supplier<core.BearerToken>;
+    }
 
-  export interface RequestOptions {
-    /** The maximum time to wait for a response in seconds. */
-    timeoutInSeconds?: number;
-    /** The number of times to retry the request. Defaults to 2. */
-    maxRetries?: number;
-    /** A hook to abort the request. */
-    abortSignal?: AbortSignal;
-    /** Additional headers to include in the request. */
-    headers?: Record<string, string>;
-  }
+    export interface RequestOptions {
+        /** The maximum time to wait for a response in seconds. */
+        timeoutInSeconds?: number;
+        /** The number of times to retry the request. Defaults to 2. */
+        maxRetries?: number;
+        /** A hook to abort the request. */
+        abortSignal?: AbortSignal;
+        /** Additional headers to include in the request. */
+        headers?: Record<string, string>;
+    }
 }
 
 export class Templates {
-  constructor(protected readonly _options: Templates.Options) {}
+    constructor(protected readonly _options: Templates.Options) {}
 
-  /**
-   * Initializes template creation by generating a unique ID and providing a presigned URL for template ZIP upload. Sets unfinished tag for tracking incomplete templates.
-   *
-   * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
-   *
-   * @example
-   *     await client.templates.initializeTemplateCreation()
-   */
-  public initializeTemplateCreation(
-    requestOptions?: Templates.RequestOptions
-  ): core.HttpResponsePromise<PogodocApi.InitializeTemplateCreationResponse> {
-    return core.HttpResponsePromise.fromPromise(
-      this.__initializeTemplateCreation(requestOptions)
-    );
-  }
-
-  private async __initializeTemplateCreation(
-    requestOptions?: Templates.RequestOptions
-  ): Promise<
-    core.WithRawResponse<PogodocApi.InitializeTemplateCreationResponse>
-  > {
-    const _response = await core.fetcher({
-      url: urlJoin(
-        (await core.Supplier.get(this._options.baseUrl)) ??
-          (await core.Supplier.get(this._options.environment)) ??
-          environments.PogodocApiEnvironment.Default,
-        "templates/init"
-      ),
-      method: "GET",
-      headers: {
-        Authorization: await this._getAuthorizationHeader(),
-        "X-Fern-Language": "JavaScript",
-        "X-Fern-Runtime": core.RUNTIME.type,
-        "X-Fern-Runtime-Version": core.RUNTIME.version,
-        ...requestOptions?.headers,
-      },
-      contentType: "application/json",
-      requestType: "json",
-      timeoutMs:
-        requestOptions?.timeoutInSeconds != null
-          ? requestOptions.timeoutInSeconds * 1000
-          : 60000,
-      maxRetries: requestOptions?.maxRetries,
-      abortSignal: requestOptions?.abortSignal,
-    });
-    if (_response.ok) {
-      return {
-        data: _response.body as PogodocApi.InitializeTemplateCreationResponse,
-        rawResponse: _response.rawResponse,
-      };
+    /**
+     * Initializes template creation by generating a unique ID and providing a presigned URL for template ZIP upload. Sets unfinished tag for tracking incomplete templates.
+     *
+     * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @example
+     *     await client.templates.initializeTemplateCreation()
+     */
+    public initializeTemplateCreation(
+        requestOptions?: Templates.RequestOptions,
+    ): core.HttpResponsePromise<PogodocApi.InitializeTemplateCreationResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__initializeTemplateCreation(requestOptions));
     }
 
-    if (_response.error.reason === "status-code") {
-      throw new errors.PogodocApiError({
-        statusCode: _response.error.statusCode,
-        body: _response.error.body,
-        rawResponse: _response.rawResponse,
-      });
-    }
-
-    switch (_response.error.reason) {
-      case "non-json":
-        throw new errors.PogodocApiError({
-          statusCode: _response.error.statusCode,
-          body: _response.error.rawBody,
-          rawResponse: _response.rawResponse,
+    private async __initializeTemplateCreation(
+        requestOptions?: Templates.RequestOptions,
+    ): Promise<core.WithRawResponse<PogodocApi.InitializeTemplateCreationResponse>> {
+        const _response = await core.fetcher({
+            url: urlJoin(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.PogodocApiEnvironment.Default,
+                "templates/init",
+            ),
+            method: "GET",
+            headers: {
+                Authorization: await this._getAuthorizationHeader(),
+                "X-Fern-Language": "JavaScript",
+                "X-Fern-Runtime": core.RUNTIME.type,
+                "X-Fern-Runtime-Version": core.RUNTIME.version,
+                ...requestOptions?.headers,
+            },
+            contentType: "application/json",
+            requestType: "json",
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
         });
-      case "timeout":
-        throw new errors.PogodocApiTimeoutError(
-          "Timeout exceeded when calling GET /templates/init."
+        if (_response.ok) {
+            return {
+                data: _response.body as PogodocApi.InitializeTemplateCreationResponse,
+                rawResponse: _response.rawResponse,
+            };
+        }
+
+        if (_response.error.reason === "status-code") {
+            throw new errors.PogodocApiError({
+                statusCode: _response.error.statusCode,
+                body: _response.error.body,
+                rawResponse: _response.rawResponse,
+            });
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.PogodocApiError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.PogodocApiTimeoutError("Timeout exceeded when calling GET /templates/init.");
+            case "unknown":
+                throw new errors.PogodocApiError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
+     * Finalizes template creation by saving template info to Strapi, copying preview files to permanent storage, and creating template index. Removes unfinished tag upon completion.
+     *
+     * @param {string} templateId
+     * @param {PogodocApi.SaveCreatedTemplateRequest} request
+     * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @example
+     *     await client.templates.saveCreatedTemplate("templateId", {
+     *         templateInfo: {
+     *             title: "title",
+     *             description: "description",
+     *             type: "docx",
+     *             sampleData: {
+     *                 "key": "value"
+     *             },
+     *             categories: ["invoice"]
+     *         },
+     *         previewIds: {
+     *             pngJobId: "pngJobId",
+     *             pdfJobId: "pdfJobId"
+     *         }
+     *     })
+     */
+    public saveCreatedTemplate(
+        templateId: string,
+        request: PogodocApi.SaveCreatedTemplateRequest,
+        requestOptions?: Templates.RequestOptions,
+    ): core.HttpResponsePromise<void> {
+        return core.HttpResponsePromise.fromPromise(this.__saveCreatedTemplate(templateId, request, requestOptions));
+    }
+
+    private async __saveCreatedTemplate(
+        templateId: string,
+        request: PogodocApi.SaveCreatedTemplateRequest,
+        requestOptions?: Templates.RequestOptions,
+    ): Promise<core.WithRawResponse<void>> {
+        const _response = await core.fetcher({
+            url: urlJoin(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.PogodocApiEnvironment.Default,
+                `templates/${encodeURIComponent(templateId)}`,
+            ),
+            method: "POST",
+            headers: {
+                Authorization: await this._getAuthorizationHeader(),
+                "X-Fern-Language": "JavaScript",
+                "X-Fern-Runtime": core.RUNTIME.type,
+                "X-Fern-Runtime-Version": core.RUNTIME.version,
+                ...requestOptions?.headers,
+            },
+            contentType: "application/json",
+            requestType: "json",
+            body: request,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: undefined, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            throw new errors.PogodocApiError({
+                statusCode: _response.error.statusCode,
+                body: _response.error.body,
+                rawResponse: _response.rawResponse,
+            });
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.PogodocApiError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.PogodocApiTimeoutError("Timeout exceeded when calling POST /templates/{templateId}.");
+            case "unknown":
+                throw new errors.PogodocApiError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
+     * Updates template content, handles S3 storage cleanup for old content, updates template metadata in Strapi, and manages preview files. Removes unfinished tags after successful update.
+     *
+     * @param {string} templateId
+     * @param {PogodocApi.UpdateTemplateRequest} request
+     * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @example
+     *     await client.templates.updateTemplate("templateId", {
+     *         templateInfo: {
+     *             title: "title",
+     *             description: "description",
+     *             type: "docx",
+     *             sampleData: {
+     *                 "key": "value"
+     *             },
+     *             categories: ["invoice"]
+     *         },
+     *         previewIds: {
+     *             pngJobId: "pngJobId",
+     *             pdfJobId: "pdfJobId"
+     *         },
+     *         contentId: "contentId"
+     *     })
+     */
+    public updateTemplate(
+        templateId: string,
+        request: PogodocApi.UpdateTemplateRequest,
+        requestOptions?: Templates.RequestOptions,
+    ): core.HttpResponsePromise<PogodocApi.UpdateTemplateResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__updateTemplate(templateId, request, requestOptions));
+    }
+
+    private async __updateTemplate(
+        templateId: string,
+        request: PogodocApi.UpdateTemplateRequest,
+        requestOptions?: Templates.RequestOptions,
+    ): Promise<core.WithRawResponse<PogodocApi.UpdateTemplateResponse>> {
+        const _response = await core.fetcher({
+            url: urlJoin(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.PogodocApiEnvironment.Default,
+                `templates/${encodeURIComponent(templateId)}`,
+            ),
+            method: "PUT",
+            headers: {
+                Authorization: await this._getAuthorizationHeader(),
+                "X-Fern-Language": "JavaScript",
+                "X-Fern-Runtime": core.RUNTIME.type,
+                "X-Fern-Runtime-Version": core.RUNTIME.version,
+                ...requestOptions?.headers,
+            },
+            contentType: "application/json",
+            requestType: "json",
+            body: request,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: _response.body as PogodocApi.UpdateTemplateResponse, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            throw new errors.PogodocApiError({
+                statusCode: _response.error.statusCode,
+                body: _response.error.body,
+                rawResponse: _response.rawResponse,
+            });
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.PogodocApiError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.PogodocApiTimeoutError("Timeout exceeded when calling PUT /templates/{templateId}.");
+            case "unknown":
+                throw new errors.PogodocApiError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
+     * Deletes a template from Strapi and associated S3 storage. Removes all associated files and metadata.
+     *
+     * @param {string} templateId - ID of the template to be deleted
+     * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @example
+     *     await client.templates.deleteTemplate("templateId")
+     */
+    public deleteTemplate(
+        templateId: string,
+        requestOptions?: Templates.RequestOptions,
+    ): core.HttpResponsePromise<PogodocApi.DeleteTemplateResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__deleteTemplate(templateId, requestOptions));
+    }
+
+    private async __deleteTemplate(
+        templateId: string,
+        requestOptions?: Templates.RequestOptions,
+    ): Promise<core.WithRawResponse<PogodocApi.DeleteTemplateResponse>> {
+        const _response = await core.fetcher({
+            url: urlJoin(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.PogodocApiEnvironment.Default,
+                `templates/${encodeURIComponent(templateId)}`,
+            ),
+            method: "DELETE",
+            headers: {
+                Authorization: await this._getAuthorizationHeader(),
+                "X-Fern-Language": "JavaScript",
+                "X-Fern-Runtime": core.RUNTIME.type,
+                "X-Fern-Runtime-Version": core.RUNTIME.version,
+                ...requestOptions?.headers,
+            },
+            contentType: "application/json",
+            requestType: "json",
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: _response.body as PogodocApi.DeleteTemplateResponse, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            throw new errors.PogodocApiError({
+                statusCode: _response.error.statusCode,
+                body: _response.error.body,
+                rawResponse: _response.rawResponse,
+            });
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.PogodocApiError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.PogodocApiTimeoutError(
+                    "Timeout exceeded when calling DELETE /templates/{templateId}.",
+                );
+            case "unknown":
+                throw new errors.PogodocApiError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
+     * Extracts contents from an uploaded template ZIP file and stores individual files in the appropriate S3 storage structure.
+     *
+     * @param {string} templateId - ID of the template to be used
+     * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @example
+     *     await client.templates.extractTemplateFiles("templateId")
+     */
+    public extractTemplateFiles(
+        templateId: string,
+        requestOptions?: Templates.RequestOptions,
+    ): core.HttpResponsePromise<void> {
+        return core.HttpResponsePromise.fromPromise(this.__extractTemplateFiles(templateId, requestOptions));
+    }
+
+    private async __extractTemplateFiles(
+        templateId: string,
+        requestOptions?: Templates.RequestOptions,
+    ): Promise<core.WithRawResponse<void>> {
+        const _response = await core.fetcher({
+            url: urlJoin(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.PogodocApiEnvironment.Default,
+                `templates/${encodeURIComponent(templateId)}/unzip`,
+            ),
+            method: "PATCH",
+            headers: {
+                Authorization: await this._getAuthorizationHeader(),
+                "X-Fern-Language": "JavaScript",
+                "X-Fern-Runtime": core.RUNTIME.type,
+                "X-Fern-Runtime-Version": core.RUNTIME.version,
+                ...requestOptions?.headers,
+            },
+            contentType: "application/json",
+            requestType: "json",
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: undefined, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            throw new errors.PogodocApiError({
+                statusCode: _response.error.statusCode,
+                body: _response.error.body,
+                rawResponse: _response.rawResponse,
+            });
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.PogodocApiError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.PogodocApiTimeoutError(
+                    "Timeout exceeded when calling PATCH /templates/{templateId}/unzip.",
+                );
+            case "unknown":
+                throw new errors.PogodocApiError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
+     * Creates both PNG and PDF preview files for template visualization. Generates previews in parallel and returns URLs for both formats.
+     *
+     * @param {string} templateId - ID of the template to be used
+     * @param {PogodocApi.GenerateTemplatePreviewsRequest} request
+     * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @example
+     *     await client.templates.generateTemplatePreviews("templateId", {
+     *         type: "docx",
+     *         data: {
+     *             "key": "value"
+     *         }
+     *     })
+     */
+    public generateTemplatePreviews(
+        templateId: string,
+        request: PogodocApi.GenerateTemplatePreviewsRequest,
+        requestOptions?: Templates.RequestOptions,
+    ): core.HttpResponsePromise<PogodocApi.GenerateTemplatePreviewsResponse> {
+        return core.HttpResponsePromise.fromPromise(
+            this.__generateTemplatePreviews(templateId, request, requestOptions),
         );
-      case "unknown":
-        throw new errors.PogodocApiError({
-          message: _response.error.errorMessage,
-          rawResponse: _response.rawResponse,
+    }
+
+    private async __generateTemplatePreviews(
+        templateId: string,
+        request: PogodocApi.GenerateTemplatePreviewsRequest,
+        requestOptions?: Templates.RequestOptions,
+    ): Promise<core.WithRawResponse<PogodocApi.GenerateTemplatePreviewsResponse>> {
+        const _response = await core.fetcher({
+            url: urlJoin(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.PogodocApiEnvironment.Default,
+                `templates/${encodeURIComponent(templateId)}/render-previews`,
+            ),
+            method: "POST",
+            headers: {
+                Authorization: await this._getAuthorizationHeader(),
+                "X-Fern-Language": "JavaScript",
+                "X-Fern-Runtime": core.RUNTIME.type,
+                "X-Fern-Runtime-Version": core.RUNTIME.version,
+                ...requestOptions?.headers,
+            },
+            contentType: "application/json",
+            requestType: "json",
+            body: request,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
         });
-    }
-  }
+        if (_response.ok) {
+            return {
+                data: _response.body as PogodocApi.GenerateTemplatePreviewsResponse,
+                rawResponse: _response.rawResponse,
+            };
+        }
 
-  /**
-   * Finalizes template creation by saving template info to Strapi, copying preview files to permanent storage, and creating template index. Removes unfinished tag upon completion.
-   *
-   * @param {string} templateId
-   * @param {PogodocApi.SaveCreatedTemplateRequest} request
-   * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
-   *
-   * @example
-   *     await client.templates.saveCreatedTemplate("templateId", {
-   *         templateInfo: {
-   *             title: "title",
-   *             description: "description",
-   *             type: "docx",
-   *             sampleData: {
-   *                 "key": "value"
-   *             },
-   *             categories: ["invoice"]
-   *         },
-   *         previewIds: {
-   *             pngJobId: "pngJobId",
-   *             pdfJobId: "pdfJobId"
-   *         }
-   *     })
-   */
-  public saveCreatedTemplate(
-    templateId: string,
-    request: PogodocApi.SaveCreatedTemplateRequest,
-    requestOptions?: Templates.RequestOptions
-  ): core.HttpResponsePromise<void> {
-    return core.HttpResponsePromise.fromPromise(
-      this.__saveCreatedTemplate(templateId, request, requestOptions)
-    );
-  }
+        if (_response.error.reason === "status-code") {
+            throw new errors.PogodocApiError({
+                statusCode: _response.error.statusCode,
+                body: _response.error.body,
+                rawResponse: _response.rawResponse,
+            });
+        }
 
-  private async __saveCreatedTemplate(
-    templateId: string,
-    request: PogodocApi.SaveCreatedTemplateRequest,
-    requestOptions?: Templates.RequestOptions
-  ): Promise<core.WithRawResponse<void>> {
-    const _response = await core.fetcher({
-      url: urlJoin(
-        (await core.Supplier.get(this._options.baseUrl)) ??
-          (await core.Supplier.get(this._options.environment)) ??
-          environments.PogodocApiEnvironment.Default,
-        `templates/${encodeURIComponent(templateId)}`
-      ),
-      method: "POST",
-      headers: {
-        Authorization: await this._getAuthorizationHeader(),
-        "X-Fern-Language": "JavaScript",
-        "X-Fern-Runtime": core.RUNTIME.type,
-        "X-Fern-Runtime-Version": core.RUNTIME.version,
-        ...requestOptions?.headers,
-      },
-      contentType: "application/json",
-      requestType: "json",
-      body: request,
-      timeoutMs:
-        requestOptions?.timeoutInSeconds != null
-          ? requestOptions.timeoutInSeconds * 1000
-          : 60000,
-      maxRetries: requestOptions?.maxRetries,
-      abortSignal: requestOptions?.abortSignal,
-    });
-    if (_response.ok) {
-      return { data: undefined, rawResponse: _response.rawResponse };
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.PogodocApiError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.PogodocApiTimeoutError(
+                    "Timeout exceeded when calling POST /templates/{templateId}/render-previews.",
+                );
+            case "unknown":
+                throw new errors.PogodocApiError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
     }
 
-    if (_response.error.reason === "status-code") {
-      console.log("================================================");
-      console.log("status code", _response.error.statusCode);
-      console.log("body", _response.error.body);
-      console.log("raw response", _response.rawResponse);
-      console.log(
-        "================================================\n\n\n\n\n\n\n"
-      );
-      throw new errors.PogodocApiError({
-        statusCode: _response.error.statusCode,
-        body: _response.error.body,
-        rawResponse: _response.rawResponse,
-      });
+    /**
+     * Generates a presigned URL for template access. Used for downloading template files from S3 storage.
+     *
+     * @param {string} templateId - ID of the template that is being downloaded
+     * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @example
+     *     await client.templates.generatePresignedGetUrl("templateId")
+     */
+    public generatePresignedGetUrl(
+        templateId: string,
+        requestOptions?: Templates.RequestOptions,
+    ): core.HttpResponsePromise<PogodocApi.GeneratePresignedGetUrlResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__generatePresignedGetUrl(templateId, requestOptions));
     }
 
-    switch (_response.error.reason) {
-      case "non-json":
-        throw new errors.PogodocApiError({
-          statusCode: _response.error.statusCode,
-          body: _response.error.rawBody,
-          rawResponse: _response.rawResponse,
+    private async __generatePresignedGetUrl(
+        templateId: string,
+        requestOptions?: Templates.RequestOptions,
+    ): Promise<core.WithRawResponse<PogodocApi.GeneratePresignedGetUrlResponse>> {
+        const _response = await core.fetcher({
+            url: urlJoin(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.PogodocApiEnvironment.Default,
+                `templates/${encodeURIComponent(templateId)}/presigned-url`,
+            ),
+            method: "GET",
+            headers: {
+                Authorization: await this._getAuthorizationHeader(),
+                "X-Fern-Language": "JavaScript",
+                "X-Fern-Runtime": core.RUNTIME.type,
+                "X-Fern-Runtime-Version": core.RUNTIME.version,
+                ...requestOptions?.headers,
+            },
+            contentType: "application/json",
+            requestType: "json",
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
         });
-      case "timeout":
-        throw new errors.PogodocApiTimeoutError(
-          "Timeout exceeded when calling POST /templates/{templateId}."
+        if (_response.ok) {
+            return {
+                data: _response.body as PogodocApi.GeneratePresignedGetUrlResponse,
+                rawResponse: _response.rawResponse,
+            };
+        }
+
+        if (_response.error.reason === "status-code") {
+            throw new errors.PogodocApiError({
+                statusCode: _response.error.statusCode,
+                body: _response.error.body,
+                rawResponse: _response.rawResponse,
+            });
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.PogodocApiError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.PogodocApiTimeoutError(
+                    "Timeout exceeded when calling GET /templates/{templateId}/presigned-url.",
+                );
+            case "unknown":
+                throw new errors.PogodocApiError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
+     * Retrieves the template index.html file from S3 storage. Used for rendering the template in the browser.
+     *
+     * @param {string} templateId - ID of the template to be used
+     * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @example
+     *     await client.templates.getTemplateIndexHtml("templateId")
+     */
+    public getTemplateIndexHtml(
+        templateId: string,
+        requestOptions?: Templates.RequestOptions,
+    ): core.HttpResponsePromise<PogodocApi.GetTemplateIndexHtmlResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__getTemplateIndexHtml(templateId, requestOptions));
+    }
+
+    private async __getTemplateIndexHtml(
+        templateId: string,
+        requestOptions?: Templates.RequestOptions,
+    ): Promise<core.WithRawResponse<PogodocApi.GetTemplateIndexHtmlResponse>> {
+        const _response = await core.fetcher({
+            url: urlJoin(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.PogodocApiEnvironment.Default,
+                `templates/${encodeURIComponent(templateId)}/index-html`,
+            ),
+            method: "GET",
+            headers: {
+                Authorization: await this._getAuthorizationHeader(),
+                "X-Fern-Language": "JavaScript",
+                "X-Fern-Runtime": core.RUNTIME.type,
+                "X-Fern-Runtime-Version": core.RUNTIME.version,
+                ...requestOptions?.headers,
+            },
+            contentType: "application/json",
+            requestType: "json",
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return {
+                data: _response.body as PogodocApi.GetTemplateIndexHtmlResponse,
+                rawResponse: _response.rawResponse,
+            };
+        }
+
+        if (_response.error.reason === "status-code") {
+            throw new errors.PogodocApiError({
+                statusCode: _response.error.statusCode,
+                body: _response.error.body,
+                rawResponse: _response.rawResponse,
+            });
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.PogodocApiError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.PogodocApiTimeoutError(
+                    "Timeout exceeded when calling GET /templates/{templateId}/index-html.",
+                );
+            case "unknown":
+                throw new errors.PogodocApiError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
+     * Uploads the template index.html file to S3 storage. Used for rendering the template in the browser.
+     *
+     * @param {string} templateId - ID of the template to be used
+     * @param {PogodocApi.UploadTemplateIndexHtmlRequest} request
+     * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @example
+     *     await client.templates.uploadTemplateIndexHtml("templateId", {
+     *         templateIndex: "templateIndex"
+     *     })
+     */
+    public uploadTemplateIndexHtml(
+        templateId: string,
+        request: PogodocApi.UploadTemplateIndexHtmlRequest,
+        requestOptions?: Templates.RequestOptions,
+    ): core.HttpResponsePromise<void> {
+        return core.HttpResponsePromise.fromPromise(
+            this.__uploadTemplateIndexHtml(templateId, request, requestOptions),
         );
-      case "unknown":
-        throw new errors.PogodocApiError({
-          message: _response.error.errorMessage,
-          rawResponse: _response.rawResponse,
+    }
+
+    private async __uploadTemplateIndexHtml(
+        templateId: string,
+        request: PogodocApi.UploadTemplateIndexHtmlRequest,
+        requestOptions?: Templates.RequestOptions,
+    ): Promise<core.WithRawResponse<void>> {
+        const _response = await core.fetcher({
+            url: urlJoin(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.PogodocApiEnvironment.Default,
+                `templates/${encodeURIComponent(templateId)}/index-html`,
+            ),
+            method: "POST",
+            headers: {
+                Authorization: await this._getAuthorizationHeader(),
+                "X-Fern-Language": "JavaScript",
+                "X-Fern-Runtime": core.RUNTIME.type,
+                "X-Fern-Runtime-Version": core.RUNTIME.version,
+                ...requestOptions?.headers,
+            },
+            contentType: "application/json",
+            requestType: "json",
+            body: request,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
         });
-    }
-  }
+        if (_response.ok) {
+            return { data: undefined, rawResponse: _response.rawResponse };
+        }
 
-  /**
-   * Updates template content, handles S3 storage cleanup for old content, updates template metadata in Strapi, and manages preview files. Removes unfinished tags after successful update.
-   *
-   * @param {string} templateId
-   * @param {PogodocApi.UpdateTemplateRequest} request
-   * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
-   *
-   * @example
-   *     await client.templates.updateTemplate("templateId", {
-   *         templateInfo: {
-   *             title: "title",
-   *             description: "description",
-   *             type: "docx",
-   *             sampleData: {
-   *                 "key": "value"
-   *             },
-   *             categories: ["invoice"]
-   *         },
-   *         previewIds: {
-   *             pngJobId: "pngJobId",
-   *             pdfJobId: "pdfJobId"
-   *         },
-   *         contentId: "contentId"
-   *     })
-   */
-  public updateTemplate(
-    templateId: string,
-    request: PogodocApi.UpdateTemplateRequest,
-    requestOptions?: Templates.RequestOptions
-  ): core.HttpResponsePromise<PogodocApi.UpdateTemplateResponse> {
-    return core.HttpResponsePromise.fromPromise(
-      this.__updateTemplate(templateId, request, requestOptions)
-    );
-  }
+        if (_response.error.reason === "status-code") {
+            throw new errors.PogodocApiError({
+                statusCode: _response.error.statusCode,
+                body: _response.error.body,
+                rawResponse: _response.rawResponse,
+            });
+        }
 
-  private async __updateTemplate(
-    templateId: string,
-    request: PogodocApi.UpdateTemplateRequest,
-    requestOptions?: Templates.RequestOptions
-  ): Promise<core.WithRawResponse<PogodocApi.UpdateTemplateResponse>> {
-    const _response = await core.fetcher({
-      url: urlJoin(
-        (await core.Supplier.get(this._options.baseUrl)) ??
-          (await core.Supplier.get(this._options.environment)) ??
-          environments.PogodocApiEnvironment.Default,
-        `templates/${encodeURIComponent(templateId)}`
-      ),
-      method: "PUT",
-      headers: {
-        Authorization: await this._getAuthorizationHeader(),
-        "X-Fern-Language": "JavaScript",
-        "X-Fern-Runtime": core.RUNTIME.type,
-        "X-Fern-Runtime-Version": core.RUNTIME.version,
-        ...requestOptions?.headers,
-      },
-      contentType: "application/json",
-      requestType: "json",
-      body: request,
-      timeoutMs:
-        requestOptions?.timeoutInSeconds != null
-          ? requestOptions.timeoutInSeconds * 1000
-          : 60000,
-      maxRetries: requestOptions?.maxRetries,
-      abortSignal: requestOptions?.abortSignal,
-    });
-    if (_response.ok) {
-      return {
-        data: _response.body as PogodocApi.UpdateTemplateResponse,
-        rawResponse: _response.rawResponse,
-      };
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.PogodocApiError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.PogodocApiTimeoutError(
+                    "Timeout exceeded when calling POST /templates/{templateId}/index-html.",
+                );
+            case "unknown":
+                throw new errors.PogodocApiError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
     }
 
-    if (_response.error.reason === "status-code") {
-      throw new errors.PogodocApiError({
-        statusCode: _response.error.statusCode,
-        body: _response.error.body,
-        rawResponse: _response.rawResponse,
-      });
+    /**
+     * Creates a new template by duplicating an existing template's content and metadata. Includes copying preview files and template index.
+     *
+     * @param {string} templateId - ID of the template to be used
+     * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @example
+     *     await client.templates.cloneTemplate("templateId")
+     */
+    public cloneTemplate(
+        templateId: string,
+        requestOptions?: Templates.RequestOptions,
+    ): core.HttpResponsePromise<PogodocApi.CloneTemplateResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__cloneTemplate(templateId, requestOptions));
     }
 
-    switch (_response.error.reason) {
-      case "non-json":
-        throw new errors.PogodocApiError({
-          statusCode: _response.error.statusCode,
-          body: _response.error.rawBody,
-          rawResponse: _response.rawResponse,
+    private async __cloneTemplate(
+        templateId: string,
+        requestOptions?: Templates.RequestOptions,
+    ): Promise<core.WithRawResponse<PogodocApi.CloneTemplateResponse>> {
+        const _response = await core.fetcher({
+            url: urlJoin(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.PogodocApiEnvironment.Default,
+                `templates/${encodeURIComponent(templateId)}/clone`,
+            ),
+            method: "POST",
+            headers: {
+                Authorization: await this._getAuthorizationHeader(),
+                "X-Fern-Language": "JavaScript",
+                "X-Fern-Runtime": core.RUNTIME.type,
+                "X-Fern-Runtime-Version": core.RUNTIME.version,
+                ...requestOptions?.headers,
+            },
+            contentType: "application/json",
+            requestType: "json",
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
         });
-      case "timeout":
-        throw new errors.PogodocApiTimeoutError(
-          "Timeout exceeded when calling PUT /templates/{templateId}."
-        );
-      case "unknown":
-        throw new errors.PogodocApiError({
-          message: _response.error.errorMessage,
-          rawResponse: _response.rawResponse,
-        });
-    }
-  }
+        if (_response.ok) {
+            return { data: _response.body as PogodocApi.CloneTemplateResponse, rawResponse: _response.rawResponse };
+        }
 
-  /**
-   * Deletes a template from Strapi and associated S3 storage. Removes all associated files and metadata.
-   *
-   * @param {string} templateId - ID of the template to be deleted
-   * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
-   *
-   * @example
-   *     await client.templates.deleteTemplate("templateId")
-   */
-  public deleteTemplate(
-    templateId: string,
-    requestOptions?: Templates.RequestOptions
-  ): core.HttpResponsePromise<PogodocApi.DeleteTemplateResponse> {
-    return core.HttpResponsePromise.fromPromise(
-      this.__deleteTemplate(templateId, requestOptions)
-    );
-  }
+        if (_response.error.reason === "status-code") {
+            throw new errors.PogodocApiError({
+                statusCode: _response.error.statusCode,
+                body: _response.error.body,
+                rawResponse: _response.rawResponse,
+            });
+        }
 
-  private async __deleteTemplate(
-    templateId: string,
-    requestOptions?: Templates.RequestOptions
-  ): Promise<core.WithRawResponse<PogodocApi.DeleteTemplateResponse>> {
-    const _response = await core.fetcher({
-      url: urlJoin(
-        (await core.Supplier.get(this._options.baseUrl)) ??
-          (await core.Supplier.get(this._options.environment)) ??
-          environments.PogodocApiEnvironment.Default,
-        `templates/${encodeURIComponent(templateId)}`
-      ),
-      method: "DELETE",
-      headers: {
-        Authorization: await this._getAuthorizationHeader(),
-        "X-Fern-Language": "JavaScript",
-        "X-Fern-Runtime": core.RUNTIME.type,
-        "X-Fern-Runtime-Version": core.RUNTIME.version,
-        ...requestOptions?.headers,
-      },
-      contentType: "application/json",
-      requestType: "json",
-      timeoutMs:
-        requestOptions?.timeoutInSeconds != null
-          ? requestOptions.timeoutInSeconds * 1000
-          : 60000,
-      maxRetries: requestOptions?.maxRetries,
-      abortSignal: requestOptions?.abortSignal,
-    });
-    if (_response.ok) {
-      return {
-        data: _response.body as PogodocApi.DeleteTemplateResponse,
-        rawResponse: _response.rawResponse,
-      };
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.PogodocApiError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.PogodocApiTimeoutError(
+                    "Timeout exceeded when calling POST /templates/{templateId}/clone.",
+                );
+            case "unknown":
+                throw new errors.PogodocApiError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
     }
 
-    if (_response.error.reason === "status-code") {
-      throw new errors.PogodocApiError({
-        statusCode: _response.error.statusCode,
-        body: _response.error.body,
-        rawResponse: _response.rawResponse,
-      });
+    protected async _getAuthorizationHeader(): Promise<string> {
+        return `Bearer ${await core.Supplier.get(this._options.token)}`;
     }
-
-    switch (_response.error.reason) {
-      case "non-json":
-        throw new errors.PogodocApiError({
-          statusCode: _response.error.statusCode,
-          body: _response.error.rawBody,
-          rawResponse: _response.rawResponse,
-        });
-      case "timeout":
-        throw new errors.PogodocApiTimeoutError(
-          "Timeout exceeded when calling DELETE /templates/{templateId}."
-        );
-      case "unknown":
-        throw new errors.PogodocApiError({
-          message: _response.error.errorMessage,
-          rawResponse: _response.rawResponse,
-        });
-    }
-  }
-
-  /**
-   * Extracts contents from an uploaded template ZIP file and stores individual files in the appropriate S3 storage structure.
-   *
-   * @param {string} templateId - ID of the template to be used
-   * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
-   *
-   * @example
-   *     await client.templates.extractTemplateFiles("templateId")
-   */
-  public extractTemplateFiles(
-    templateId: string,
-    requestOptions?: Templates.RequestOptions
-  ): core.HttpResponsePromise<void> {
-    return core.HttpResponsePromise.fromPromise(
-      this.__extractTemplateFiles(templateId, requestOptions)
-    );
-  }
-
-  private async __extractTemplateFiles(
-    templateId: string,
-    requestOptions?: Templates.RequestOptions
-  ): Promise<core.WithRawResponse<void>> {
-    const _response = await core.fetcher({
-      url: urlJoin(
-        (await core.Supplier.get(this._options.baseUrl)) ??
-          (await core.Supplier.get(this._options.environment)) ??
-          environments.PogodocApiEnvironment.Default,
-        `templates/${encodeURIComponent(templateId)}/unzip`
-      ),
-      method: "PATCH",
-      headers: {
-        Authorization: await this._getAuthorizationHeader(),
-        "X-Fern-Language": "JavaScript",
-        "X-Fern-Runtime": core.RUNTIME.type,
-        "X-Fern-Runtime-Version": core.RUNTIME.version,
-        ...requestOptions?.headers,
-      },
-      contentType: "application/json",
-      requestType: "json",
-      timeoutMs:
-        requestOptions?.timeoutInSeconds != null
-          ? requestOptions.timeoutInSeconds * 1000
-          : 60000,
-      maxRetries: requestOptions?.maxRetries,
-      abortSignal: requestOptions?.abortSignal,
-    });
-    if (_response.ok) {
-      return { data: undefined, rawResponse: _response.rawResponse };
-    }
-
-    if (_response.error.reason === "status-code") {
-      throw new errors.PogodocApiError({
-        statusCode: _response.error.statusCode,
-        body: _response.error.body,
-        rawResponse: _response.rawResponse,
-      });
-    }
-
-    switch (_response.error.reason) {
-      case "non-json":
-        throw new errors.PogodocApiError({
-          statusCode: _response.error.statusCode,
-          body: _response.error.rawBody,
-          rawResponse: _response.rawResponse,
-        });
-      case "timeout":
-        throw new errors.PogodocApiTimeoutError(
-          "Timeout exceeded when calling PATCH /templates/{templateId}/unzip."
-        );
-      case "unknown":
-        throw new errors.PogodocApiError({
-          message: _response.error.errorMessage,
-          rawResponse: _response.rawResponse,
-        });
-    }
-  }
-
-  /**
-   * Creates both PNG and PDF preview files for template visualization. Generates previews in parallel and returns URLs for both formats.
-   *
-   * @param {string} templateId - ID of the template to be used
-   * @param {PogodocApi.GenerateTemplatePreviewsRequest} request
-   * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
-   *
-   * @example
-   *     await client.templates.generateTemplatePreviews("templateId", {
-   *         type: "docx",
-   *         data: {
-   *             "key": "value"
-   *         }
-   *     })
-   */
-  public generateTemplatePreviews(
-    templateId: string,
-    request: PogodocApi.GenerateTemplatePreviewsRequest,
-    requestOptions?: Templates.RequestOptions
-  ): core.HttpResponsePromise<PogodocApi.GenerateTemplatePreviewsResponse> {
-    return core.HttpResponsePromise.fromPromise(
-      this.__generateTemplatePreviews(templateId, request, requestOptions)
-    );
-  }
-
-  private async __generateTemplatePreviews(
-    templateId: string,
-    request: PogodocApi.GenerateTemplatePreviewsRequest,
-    requestOptions?: Templates.RequestOptions
-  ): Promise<
-    core.WithRawResponse<PogodocApi.GenerateTemplatePreviewsResponse>
-  > {
-    const _response = await core.fetcher({
-      url: urlJoin(
-        (await core.Supplier.get(this._options.baseUrl)) ??
-          (await core.Supplier.get(this._options.environment)) ??
-          environments.PogodocApiEnvironment.Default,
-        `templates/${encodeURIComponent(templateId)}/render-previews`
-      ),
-      method: "POST",
-      headers: {
-        Authorization: await this._getAuthorizationHeader(),
-        "X-Fern-Language": "JavaScript",
-        "X-Fern-Runtime": core.RUNTIME.type,
-        "X-Fern-Runtime-Version": core.RUNTIME.version,
-        ...requestOptions?.headers,
-      },
-      contentType: "application/json",
-      requestType: "json",
-      body: request,
-      timeoutMs:
-        requestOptions?.timeoutInSeconds != null
-          ? requestOptions.timeoutInSeconds * 1000
-          : 60000,
-      maxRetries: requestOptions?.maxRetries,
-      abortSignal: requestOptions?.abortSignal,
-    });
-    if (_response.ok) {
-      return {
-        data: _response.body as PogodocApi.GenerateTemplatePreviewsResponse,
-        rawResponse: _response.rawResponse,
-      };
-    }
-
-    if (_response.error.reason === "status-code") {
-      throw new errors.PogodocApiError({
-        statusCode: _response.error.statusCode,
-        body: _response.error.body,
-        rawResponse: _response.rawResponse,
-      });
-    }
-
-    switch (_response.error.reason) {
-      case "non-json":
-        throw new errors.PogodocApiError({
-          statusCode: _response.error.statusCode,
-          body: _response.error.rawBody,
-          rawResponse: _response.rawResponse,
-        });
-      case "timeout":
-        throw new errors.PogodocApiTimeoutError(
-          "Timeout exceeded when calling POST /templates/{templateId}/render-previews."
-        );
-      case "unknown":
-        throw new errors.PogodocApiError({
-          message: _response.error.errorMessage,
-          rawResponse: _response.rawResponse,
-        });
-    }
-  }
-
-  /**
-   * Generates a presigned URL for template access. Used for downloading template files from S3 storage.
-   *
-   * @param {string} templateId - ID of the template that is being downloaded
-   * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
-   *
-   * @example
-   *     await client.templates.generatePresignedGetUrl("templateId")
-   */
-  public generatePresignedGetUrl(
-    templateId: string,
-    requestOptions?: Templates.RequestOptions
-  ): core.HttpResponsePromise<PogodocApi.GeneratePresignedGetUrlResponse> {
-    return core.HttpResponsePromise.fromPromise(
-      this.__generatePresignedGetUrl(templateId, requestOptions)
-    );
-  }
-
-  private async __generatePresignedGetUrl(
-    templateId: string,
-    requestOptions?: Templates.RequestOptions
-  ): Promise<core.WithRawResponse<PogodocApi.GeneratePresignedGetUrlResponse>> {
-    const _response = await core.fetcher({
-      url: urlJoin(
-        (await core.Supplier.get(this._options.baseUrl)) ??
-          (await core.Supplier.get(this._options.environment)) ??
-          environments.PogodocApiEnvironment.Default,
-        `templates/${encodeURIComponent(templateId)}/presigned-url`
-      ),
-      method: "GET",
-      headers: {
-        Authorization: await this._getAuthorizationHeader(),
-        "X-Fern-Language": "JavaScript",
-        "X-Fern-Runtime": core.RUNTIME.type,
-        "X-Fern-Runtime-Version": core.RUNTIME.version,
-        ...requestOptions?.headers,
-      },
-      contentType: "application/json",
-      requestType: "json",
-      timeoutMs:
-        requestOptions?.timeoutInSeconds != null
-          ? requestOptions.timeoutInSeconds * 1000
-          : 60000,
-      maxRetries: requestOptions?.maxRetries,
-      abortSignal: requestOptions?.abortSignal,
-    });
-    if (_response.ok) {
-      return {
-        data: _response.body as PogodocApi.GeneratePresignedGetUrlResponse,
-        rawResponse: _response.rawResponse,
-      };
-    }
-
-    if (_response.error.reason === "status-code") {
-      throw new errors.PogodocApiError({
-        statusCode: _response.error.statusCode,
-        body: _response.error.body,
-        rawResponse: _response.rawResponse,
-      });
-    }
-
-    switch (_response.error.reason) {
-      case "non-json":
-        throw new errors.PogodocApiError({
-          statusCode: _response.error.statusCode,
-          body: _response.error.rawBody,
-          rawResponse: _response.rawResponse,
-        });
-      case "timeout":
-        throw new errors.PogodocApiTimeoutError(
-          "Timeout exceeded when calling GET /templates/{templateId}/presigned-url."
-        );
-      case "unknown":
-        throw new errors.PogodocApiError({
-          message: _response.error.errorMessage,
-          rawResponse: _response.rawResponse,
-        });
-    }
-  }
-
-  /**
-   * Retrieves the template index.html file from S3 storage. Used for rendering the template in the browser.
-   *
-   * @param {string} templateId - ID of the template to be used
-   * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
-   *
-   * @example
-   *     await client.templates.getTemplateIndexHtml("templateId")
-   */
-  public getTemplateIndexHtml(
-    templateId: string,
-    requestOptions?: Templates.RequestOptions
-  ): core.HttpResponsePromise<PogodocApi.GetTemplateIndexHtmlResponse> {
-    return core.HttpResponsePromise.fromPromise(
-      this.__getTemplateIndexHtml(templateId, requestOptions)
-    );
-  }
-
-  private async __getTemplateIndexHtml(
-    templateId: string,
-    requestOptions?: Templates.RequestOptions
-  ): Promise<core.WithRawResponse<PogodocApi.GetTemplateIndexHtmlResponse>> {
-    const _response = await core.fetcher({
-      url: urlJoin(
-        (await core.Supplier.get(this._options.baseUrl)) ??
-          (await core.Supplier.get(this._options.environment)) ??
-          environments.PogodocApiEnvironment.Default,
-        `templates/${encodeURIComponent(templateId)}/index-html`
-      ),
-      method: "GET",
-      headers: {
-        Authorization: await this._getAuthorizationHeader(),
-        "X-Fern-Language": "JavaScript",
-        "X-Fern-Runtime": core.RUNTIME.type,
-        "X-Fern-Runtime-Version": core.RUNTIME.version,
-        ...requestOptions?.headers,
-      },
-      contentType: "application/json",
-      requestType: "json",
-      timeoutMs:
-        requestOptions?.timeoutInSeconds != null
-          ? requestOptions.timeoutInSeconds * 1000
-          : 60000,
-      maxRetries: requestOptions?.maxRetries,
-      abortSignal: requestOptions?.abortSignal,
-    });
-    if (_response.ok) {
-      return {
-        data: _response.body as PogodocApi.GetTemplateIndexHtmlResponse,
-        rawResponse: _response.rawResponse,
-      };
-    }
-
-    if (_response.error.reason === "status-code") {
-      throw new errors.PogodocApiError({
-        statusCode: _response.error.statusCode,
-        body: _response.error.body,
-        rawResponse: _response.rawResponse,
-      });
-    }
-
-    switch (_response.error.reason) {
-      case "non-json":
-        throw new errors.PogodocApiError({
-          statusCode: _response.error.statusCode,
-          body: _response.error.rawBody,
-          rawResponse: _response.rawResponse,
-        });
-      case "timeout":
-        throw new errors.PogodocApiTimeoutError(
-          "Timeout exceeded when calling GET /templates/{templateId}/index-html."
-        );
-      case "unknown":
-        throw new errors.PogodocApiError({
-          message: _response.error.errorMessage,
-          rawResponse: _response.rawResponse,
-        });
-    }
-  }
-
-  /**
-   * Uploads the template index.html file to S3 storage. Used for rendering the template in the browser.
-   *
-   * @param {string} templateId - ID of the template to be used
-   * @param {PogodocApi.UploadTemplateIndexHtmlRequest} request
-   * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
-   *
-   * @example
-   *     await client.templates.uploadTemplateIndexHtml("templateId", {
-   *         templateIndex: "templateIndex"
-   *     })
-   */
-  public uploadTemplateIndexHtml(
-    templateId: string,
-    request: PogodocApi.UploadTemplateIndexHtmlRequest,
-    requestOptions?: Templates.RequestOptions
-  ): core.HttpResponsePromise<void> {
-    return core.HttpResponsePromise.fromPromise(
-      this.__uploadTemplateIndexHtml(templateId, request, requestOptions)
-    );
-  }
-
-  private async __uploadTemplateIndexHtml(
-    templateId: string,
-    request: PogodocApi.UploadTemplateIndexHtmlRequest,
-    requestOptions?: Templates.RequestOptions
-  ): Promise<core.WithRawResponse<void>> {
-    const _response = await core.fetcher({
-      url: urlJoin(
-        (await core.Supplier.get(this._options.baseUrl)) ??
-          (await core.Supplier.get(this._options.environment)) ??
-          environments.PogodocApiEnvironment.Default,
-        `templates/${encodeURIComponent(templateId)}/index-html`
-      ),
-      method: "POST",
-      headers: {
-        Authorization: await this._getAuthorizationHeader(),
-        "X-Fern-Language": "JavaScript",
-        "X-Fern-Runtime": core.RUNTIME.type,
-        "X-Fern-Runtime-Version": core.RUNTIME.version,
-        ...requestOptions?.headers,
-      },
-      contentType: "application/json",
-      requestType: "json",
-      body: request,
-      timeoutMs:
-        requestOptions?.timeoutInSeconds != null
-          ? requestOptions.timeoutInSeconds * 1000
-          : 60000,
-      maxRetries: requestOptions?.maxRetries,
-      abortSignal: requestOptions?.abortSignal,
-    });
-    if (_response.ok) {
-      return { data: undefined, rawResponse: _response.rawResponse };
-    }
-
-    if (_response.error.reason === "status-code") {
-      throw new errors.PogodocApiError({
-        statusCode: _response.error.statusCode,
-        body: _response.error.body,
-        rawResponse: _response.rawResponse,
-      });
-    }
-
-    switch (_response.error.reason) {
-      case "non-json":
-        throw new errors.PogodocApiError({
-          statusCode: _response.error.statusCode,
-          body: _response.error.rawBody,
-          rawResponse: _response.rawResponse,
-        });
-      case "timeout":
-        throw new errors.PogodocApiTimeoutError(
-          "Timeout exceeded when calling POST /templates/{templateId}/index-html."
-        );
-      case "unknown":
-        throw new errors.PogodocApiError({
-          message: _response.error.errorMessage,
-          rawResponse: _response.rawResponse,
-        });
-    }
-  }
-
-  /**
-   * Creates a new template by duplicating an existing template's content and metadata. Includes copying preview files and template index.
-   *
-   * @param {string} templateId - ID of the template to be used
-   * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
-   *
-   * @example
-   *     await client.templates.cloneTemplate("templateId")
-   */
-  public cloneTemplate(
-    templateId: string,
-    requestOptions?: Templates.RequestOptions
-  ): core.HttpResponsePromise<PogodocApi.CloneTemplateResponse> {
-    return core.HttpResponsePromise.fromPromise(
-      this.__cloneTemplate(templateId, requestOptions)
-    );
-  }
-
-  private async __cloneTemplate(
-    templateId: string,
-    requestOptions?: Templates.RequestOptions
-  ): Promise<core.WithRawResponse<PogodocApi.CloneTemplateResponse>> {
-    const _response = await core.fetcher({
-      url: urlJoin(
-        (await core.Supplier.get(this._options.baseUrl)) ??
-          (await core.Supplier.get(this._options.environment)) ??
-          environments.PogodocApiEnvironment.Default,
-        `templates/${encodeURIComponent(templateId)}/clone`
-      ),
-      method: "POST",
-      headers: {
-        Authorization: await this._getAuthorizationHeader(),
-        "X-Fern-Language": "JavaScript",
-        "X-Fern-Runtime": core.RUNTIME.type,
-        "X-Fern-Runtime-Version": core.RUNTIME.version,
-        ...requestOptions?.headers,
-      },
-      contentType: "application/json",
-      requestType: "json",
-      timeoutMs:
-        requestOptions?.timeoutInSeconds != null
-          ? requestOptions.timeoutInSeconds * 1000
-          : 60000,
-      maxRetries: requestOptions?.maxRetries,
-      abortSignal: requestOptions?.abortSignal,
-    });
-    if (_response.ok) {
-      return {
-        data: _response.body as PogodocApi.CloneTemplateResponse,
-        rawResponse: _response.rawResponse,
-      };
-    }
-
-    if (_response.error.reason === "status-code") {
-      throw new errors.PogodocApiError({
-        statusCode: _response.error.statusCode,
-        body: _response.error.body,
-        rawResponse: _response.rawResponse,
-      });
-    }
-
-    switch (_response.error.reason) {
-      case "non-json":
-        throw new errors.PogodocApiError({
-          statusCode: _response.error.statusCode,
-          body: _response.error.rawBody,
-          rawResponse: _response.rawResponse,
-        });
-      case "timeout":
-        throw new errors.PogodocApiTimeoutError(
-          "Timeout exceeded when calling POST /templates/{templateId}/clone."
-        );
-      case "unknown":
-        throw new errors.PogodocApiError({
-          message: _response.error.errorMessage,
-          rawResponse: _response.rawResponse,
-        });
-    }
-  }
-
-  protected async _getAuthorizationHeader(): Promise<string> {
-    return `Bearer ${await core.Supplier.get(this._options.token)}`;
-  }
 }
