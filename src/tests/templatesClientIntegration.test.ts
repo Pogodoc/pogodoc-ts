@@ -1,19 +1,19 @@
 import dotenv from "dotenv";
-import PogodocClient from "..";
+import { PogodocClient } from "..";
 import {
   assert,
-  beforeAll,
   beforeEach,
   describe,
   expect,
   test,
   vi,
 } from "vitest";
-import { readJsonFile, uploadToS3WithUrl } from "../utils";
+import { readJsonFile } from "./utils";
 import validator from "validator";
 import { createReadStream, readFileSync, statSync } from "fs";
 import axios from "axios";
 import * as core from "../sdk/core";
+import { uploadToS3WithUrl } from "../utils";
 
 dotenv.config();
 

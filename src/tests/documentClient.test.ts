@@ -1,13 +1,13 @@
 import { describe } from "node:test";
 import { assert, expect, test, vi } from "vitest";
 import dotenv from "dotenv";
-import PogodocClient from "..";
+import { PogodocClient } from "..";
 import fs from "fs";
 import * as validator from "validator";
 import axios from "axios";
 import * as core from "../sdk/core/index.js";
 import { PogodocApiError, PogodocApiTimeoutError } from "../sdk";
-import { stripBufferTimestamp, readJsonFile } from "../utils";
+import { stripBufferTimestamp, readJsonFile } from "./utils";
 import { StartImmediateRenderRequest } from "../sdk/api";
 import { GenerateDocumentProps } from "../types";
 

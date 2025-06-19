@@ -10,7 +10,7 @@ import { uploadToS3WithUrl } from "./utils";
 import { Readable } from "stream";
 import { InitializeRenderJobRequest } from "./sdk/api";
 
-class PogodocClient extends PogodocApiClient {
+export class PogodocClient extends PogodocApiClient {
   async saveTemplate({
     path,
     ...rest
@@ -176,6 +176,3 @@ class PogodocClient extends PogodocApiClient {
     return results;
   }
 }
-
-export default PogodocClient;
-export { uploadToS3WithUrl };
