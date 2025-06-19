@@ -3,7 +3,7 @@
  */
 
 export const PogodocApiEnvironment = {
-    Default: "https://api.pogodoc.com",
+    Default: "https://api.pogodoc.com/v1",
 } as const;
 
 export type PogodocApiEnvironment = typeof PogodocApiEnvironment.Default;
