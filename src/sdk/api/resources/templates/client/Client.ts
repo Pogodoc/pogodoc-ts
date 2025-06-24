@@ -667,7 +667,7 @@ export class Templates {
      *
      * @example
      *     await client.templates.uploadTemplateIndexHtml("templateId", {
-     *         templateIndex: "templateIndex"
+     *         indexHtml: "indexHtml"
      *     })
      */
     public uploadTemplateIndexHtml(

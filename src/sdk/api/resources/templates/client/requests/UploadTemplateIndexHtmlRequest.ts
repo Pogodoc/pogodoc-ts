@@ -5,10 +5,10 @@
 /**
  * @example
  *     {
- *         templateIndex: "templateIndex"
+ *         indexHtml: "indexHtml"
  *     }
  */
 export interface UploadTemplateIndexHtmlRequest {
     /** New index.html file of the template */
-    templateIndex: string;
+    indexHtml: string;
 }

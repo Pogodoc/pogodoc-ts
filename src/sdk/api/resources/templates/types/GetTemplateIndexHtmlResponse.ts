@@ -4,5 +4,5 @@
 
 export interface GetTemplateIndexHtmlResponse {
     /** Index.html file of the template */
-    templateIndex: string;
+    indexHtml: string;
 }
