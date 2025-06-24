@@ -11,6 +11,13 @@ import { Readable } from "stream";
 import { InitializeRenderJobRequest } from "./sdk/api";
 
 export class PogodocClient extends PogodocApiClient {
+  constructor(options: PogodocApiClient.Options) {
+    super({
+      ...options,
+      token: process.env.POGODOC_API_KEY || options.token,
+    });
+  }
+
   async saveTemplate({
     path,
     ...rest
