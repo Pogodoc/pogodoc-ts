@@ -14,6 +14,7 @@ export class PogodocClient extends PogodocApiClient {
   constructor(options: PogodocApiClient.Options) {
     super({
       ...options,
+      baseUrl: options.baseUrl || process.env.BASE_URL,
       token: process.env.POGODOC_API_KEY || options.token,
     });
   }
