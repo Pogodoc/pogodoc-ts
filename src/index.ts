@@ -12,10 +12,13 @@ import { InitializeRenderJobRequest } from "./sdk/api";
 
 export class PogodocClient extends PogodocApiClient {
   constructor(options: PogodocApiClient.Options) {
+    if (!options?.token && !process.env.POGODOC_TOKEN) {
+      throw new Error('API token is required. Please provide it either as a parameter or set the API_TOKEN environment variable.')
+    }
     super({
       ...options,
-      baseUrl: options.baseUrl || process.env.BASE_URL,
-      token: process.env.POGODOC_API_KEY || options.token,
+      baseUrl: options?.baseUrl || process.env.BASE_URL,
+      token: options?.token || process.env.POGODOC_TOKEN || "",
     });
   }
 
