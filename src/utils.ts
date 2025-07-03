@@ -1,6 +1,5 @@
 import axios from "axios";
 import { Readable } from "stream";
-import fs from "fs";
 
 export async function uploadToS3WithUrl(
   presignedUrl: string,

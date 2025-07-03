@@ -1,5 +1,5 @@
 import { Readable } from "stream";
-import { InitializeRenderJobRequest } from "./sdk/api";
+import { InitializeRenderJobRequest } from "./client/api";
 
 export type PogodocClientConstructorType = {
   token: string;

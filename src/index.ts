@@ -1,5 +1,7 @@
 import { createReadStream, statSync } from "fs";
-import { PogodocApiClient } from "./sdk";
+import { Readable } from "stream";
+import { PogodocApiClient } from "./client";
+import { InitializeRenderJobRequest } from "./client/api";
 import {
   FileStreamProps,
   GenerateDocumentProps,
@@ -7,8 +9,6 @@ import {
   UpdateTemplateProps,
 } from "./types";
 import { uploadToS3WithUrl } from "./utils";
-import { Readable } from "stream";
-import { InitializeRenderJobRequest } from "./sdk/api";
 
 export class PogodocClient extends PogodocApiClient {
   constructor(options: PogodocApiClient.Options) {
@@ -184,6 +184,8 @@ export class PogodocClient extends PogodocApiClient {
       shouldWaitForRenderCompletion,
       uploadPresignedS3Url: renderConfig.personalUploadPresignedS3Url,
     });
+
+    console.log("jobId", initResponse.jobId);
 
     const results = await this.documents.getJobStatus(initResponse.jobId);
 
