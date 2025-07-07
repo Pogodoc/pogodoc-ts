@@ -48,6 +48,7 @@ export class PogodocClient extends PogodocApiClient {
   }: FileStreamProps & SaveTemplateMetadata) {
     const { presignedTemplateUploadUrl, templateId } =
       await this.templates.initializeTemplateCreation();
+
     await uploadToS3WithUrl(
       presignedTemplateUploadUrl,
       payload,
