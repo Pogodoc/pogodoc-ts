@@ -179,14 +179,10 @@ export class PogodocClient extends PogodocApiClient {
       );
     }
 
-    console.log(initResponse.jobId);
-
     await this.documents.startRenderJob(initResponse.jobId, {
       shouldWaitForRenderCompletion,
       uploadPresignedS3Url: renderConfig.personalUploadPresignedS3Url,
     });
-
-    console.log("jobId", initResponse.jobId);
 
     const results = await this.documents.getJobStatus(initResponse.jobId);
 
