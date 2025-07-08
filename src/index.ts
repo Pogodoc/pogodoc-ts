@@ -11,7 +11,7 @@ import {
 import { uploadToS3WithUrl } from "./utils";
 
 export class PogodocClient extends PogodocApiClient {
-  constructor(options: PogodocApiClient.Options) {
+  constructor(options?: PogodocApiClient.Options) {
     const token = options?.token || process.env.POGODOC_API_TOKEN;
     if (!token) {
       throw new Error(
