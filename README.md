@@ -12,13 +12,12 @@ $ npm install @pogodoc/sdk
 
 ### Setup
 
-To use the SDK you will need an API key which can be obtained from the [Pogodoc Dashboard](https://pogodoc.com)
+To use the SDK you will need an API key which can be obtained from the [Pogodoc Dashboard](https://app.pogodoc.com)
 
 ### Example
 
 ```ts
 import { PogodocClient } from "@pogodoc/sdk";
-import * as fs from "fs";
 import * as dotenv from "dotenv";
 
 dotenv.config();
@@ -26,35 +25,19 @@ dotenv.config();
 async function main() {
   const client = new PogodocClient();
 
-  const sampleData = readJsonFile("../../data/json_data/react.json");
-  const templatePath = "../../data/templates/React-Demo-App.zip";
-
-  const templateId = await client.saveTemplate({
-    path: templatePath,
-    title: "Invoice",
-    description: "Invoice description",
-    sampleData: sampleData,
-    type: "react",
-    categories: ["invoice"],
-  });
-  console.log("Created template id:", templateId);
-
-  await client.updateTemplate({
-    path: templatePath,
-    templateId: templateId,
-    title: "Invoice Updated",
-    description: "Description updated",
-    type: "react",
-    categories: ["invoice"],
-    sampleData: sampleData,
-  });
-  console.log("Template updated successfully");
+  const sampleData = {
+    name: "John Doe",
+    email: "john.doe@example.com",
+    phone: "1234567890",
+    address: "123 Main St, Anytown, USA",
+    city: "Anytown",
+  };
 
   const response = await client.generateDocument({
     templateId: templateId,
     data: sampleData,
     renderConfig: {
-      type: "react",
+      type: "ejs",
       target: "pdf",
     },
     shouldWaitForRenderCompletion: true,
@@ -63,18 +46,7 @@ async function main() {
   console.log("Generated document url: \n", response.output?.data.url);
 }
 
-main().then(console.log);
-
-function readJsonFile(filePath: string) {
-  try {
-    const jsonString = fs.readFileSync(filePath, "utf8");
-    const data = JSON.parse(jsonString);
-
-    return data;
-  } catch (error) {
-    console.error("Error reading the JSON file:", error);
-  }
-}
+main();
 ```
 
 ### License
