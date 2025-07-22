@@ -5,10 +5,10 @@ import { PogodocClient } from "..";
 import fs from "fs";
 import * as validator from "validator";
 import axios from "axios";
-import * as core from "../sdk/core/index.js";
-import { PogodocApiError, PogodocApiTimeoutError } from "../sdk";
+import * as core from "../client/core/index.js";
+import { PogodocApiError, PogodocApiTimeoutError } from "../client";
 import { stripBufferTimestamp, readJsonFile } from "./utils";
-import { StartImmediateRenderRequest } from "../sdk/api";
+import { StartImmediateRenderRequest } from "../client/api";
 import { GenerateDocumentProps } from "../types";
 
 dotenv.config();
@@ -85,7 +85,6 @@ describe.skip("Document Client", async () => {
             toPage: 1,
           },
         },
-        shouldWaitForRenderCompletion: true,
       },
       reference: "/reference-documents/testGenerateDocumentOnePage.pdf",
     },
@@ -97,7 +96,6 @@ describe.skip("Document Client", async () => {
           type: "html",
           target: "pdf",
         },
-        shouldWaitForRenderCompletion: true,
       },
       reference: "/reference-documents/testGenerateDocument.pdf",
     },
@@ -115,7 +113,6 @@ describe.skip("Document Client", async () => {
             toPage: 1,
           },
         },
-        shouldWaitForRenderCompletion: true,
       },
     },
     // {
@@ -139,14 +136,6 @@ describe.skip("Document Client", async () => {
         }),
     },
     { fn: () => client.documents.startRenderJob("") },
-    {
-      fn: () =>
-        client.documents.generateDocumentPreview({
-          templateId: "",
-          type: "html",
-          data: { name: "Ferdzo" },
-        }),
-    },
     {
       fn: () =>
         client.documents.startImmediateRender({
@@ -303,7 +292,6 @@ describe.skip("Document Client", async () => {
             toPage: 1,
           },
         },
-        shouldWaitForRenderCompletion: true,
       });
 
       expect(documentOutput).toBeDefined();

@@ -1,6 +1,9 @@
 import axios from "axios";
 import { Readable } from "stream";
 
+export const wait = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
+
 export async function uploadToS3WithUrl(
   presignedUrl: string,
   stream: Readable,

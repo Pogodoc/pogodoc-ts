@@ -40,7 +40,6 @@ async function main() {
       type: "ejs",
       target: "pdf",
     },
-    shouldWaitForRenderCompletion: true,
   });
 
   console.log("Generated document url: \n", response.output?.data.url);

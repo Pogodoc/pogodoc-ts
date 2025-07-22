@@ -16,7 +16,6 @@ export type GenerateDocumentProps = {
     formatOpts?: InitializeRenderJobRequest.FormatOpts;
     personalUploadPresignedS3Url?: string;
   };
-  shouldWaitForRenderCompletion?: boolean;
   uploadPresignedS3Url?: string;
 };
 

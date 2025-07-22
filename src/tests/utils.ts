@@ -10,7 +10,6 @@ const templatePath = "../../data/templates/React-Demo-App.zip";
 const readStream = fs.createReadStream(templatePath);
 const fileLength = fs.statSync(templatePath).size;
 
-
 export function stripBufferTimestamp(buffer: Buffer): Buffer {
   const creationDateSequence = Buffer.from([
     0x2f, 0x43, 0x72, 0x65, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x44, 0x61, 0x74,
@@ -33,10 +32,7 @@ export function stripBufferTimestamp(buffer: Buffer): Buffer {
   return modifiedBuffer;
 }
 
-function removeSequenceRowFromBuffer(
-  buffer: Buffer<ArrayBuffer>,
-  sequence: Buffer<ArrayBuffer>
-) {
+function removeSequenceRowFromBuffer(buffer: Buffer, sequence: Buffer) {
   const sequenceStartIndex = buffer.indexOf(sequence);
   if (sequenceStartIndex !== -1) {
     const nextNewline = buffer.indexOf(0x0a, sequenceStartIndex);
@@ -60,7 +56,6 @@ export function readJsonFile(filePath: string) {
     console.error("Error reading the JSON file:", error);
   }
 }
-
 
 export const callParams = {
   templateId: "template-creation-job-id",

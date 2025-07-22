@@ -1,13 +1,15 @@
 import dotenv from "dotenv";
 import fs, { ReadStream } from "fs";
 import { describe } from "node:test";
-import * as validator from "validator";
 import { beforeEach, expect, test, vi } from "vitest";
-import PogodocClient from "../index";
-import { PogodocApiError, PogodocApiTimeoutError } from "../sdk";
-import * as core from "../sdk/core/index.js";
-import { readJsonFile } from "../utils";
-import { callParams, mockTemplateCreationFunctions } from "./utils";
+import { PogodocApiError, PogodocApiTimeoutError } from "../client";
+import * as core from "../client/core/index.js";
+import { PogodocClient } from "../index";
+import {
+  callParams,
+  mockTemplateCreationFunctions,
+  readJsonFile,
+} from "./utils";
 
 dotenv.config();
 
@@ -80,7 +82,7 @@ describe("Template Client", async () => {
     {
       fn: () =>
         client.templates.uploadTemplateIndexHtml("", {
-          templateIndex: "<html><body>Test</body></html>",
+          indexHtml: "<html><body>Test</body></html>",
         }),
     },
     { fn: () => client.templates.cloneTemplate("") },
