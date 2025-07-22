@@ -34,10 +34,10 @@ async function main() {
   };
 
   const response = await client.generateDocument({
-    templateId: templateId,
+    templateId: process.env.TEMPLATE_ID,
     data: sampleData,
     renderConfig: {
-      type: "ejs",
+      type: "html",
       target: "pdf",
     },
   });

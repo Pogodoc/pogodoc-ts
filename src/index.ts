@@ -222,6 +222,7 @@ export class PogodocClient extends PogodocApiClient {
     return contentId;
   }
 
+  // TODO: add personal upload presigned s3 url to immediate render
   /**
    * Generates a document and returns the result immediately.
    * Use this method for quick, synchronous rendering of small documents.
