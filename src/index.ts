@@ -25,6 +25,20 @@ export class PogodocClient extends PogodocApiClient {
    * @param {PogodocApiClient.Options} [options] - Configuration options for the client.
    * If a `token` is not provided, it will be read from the `POGODOC_API_TOKEN` environment variable.
    * @throws {Error} If the API token is not provided.
+   *
+   * @example
+   * ```typescript
+   * // Using environment variables for configuration
+   * const client = new PogodocClient();
+   * ```
+   *
+   * @example
+   * ```typescript
+   * // Providing configuration options directly
+   * const client = new PogodocClient({
+   *   token: "YOUR_API_TOKEN",
+   * });
+   * ```
    */
   constructor(options?: PogodocApiClient.Options) {
     const token = options?.token || process.env.POGODOC_API_TOKEN;
@@ -54,6 +68,20 @@ export class PogodocClient extends PogodocApiClient {
    * @param {any} [props.sampleData] - Sample data to be used for generating previews.
    * @param {string} [props.sourceCode] - A link to the source code of the template.
    * @returns {Promise<string>} A promise that resolves with the new template's ID.
+   *
+   * @example
+   * ```typescript
+   * const client = new PogodocClient();
+   * const templateId = await client.saveTemplate({
+   *   path: "./path/to/template.zip",
+   *   title: "My Template",
+   *   description: "This is a template for a document",
+   *   type: "react",
+   *   categories: ["example", "template"],
+   *   sampleData: { name: "John Doe" }
+   * });
+   * console.log("Template saved with ID:", templateId);
+   * ```
    */
   async saveTemplate({
     path,
@@ -86,6 +114,27 @@ export class PogodocClient extends PogodocApiClient {
    * @param {any} [props.sampleData] - Sample data to be used for generating previews.
    * @param {string} [props.sourceCode] - A link to the source code of the template.
    * @returns {Promise<string>} A promise that resolves with the new template's ID.
+   *
+   * @example
+   * ```typescript
+   * import { createReadStream, statSync } from "fs";
+   *
+   * const client = new PogodocClient();
+   * const filePath = "./path/to/template.zip";
+   * const zipStream = createReadStream(filePath);
+   * const zipLength = statSync(filePath).size;
+   *
+   * const templateId = await client.saveTemplateFromFileStream({
+   *   payload: zipStream,
+   *   payloadLength: zipLength,
+   *   title: "My Template",
+   *   description: "This is a template for a document",
+   *   type: "react",
+   *   categories: ["example", "template"],
+   *   sampleData: { name: "John Doe" },
+   * });
+   * console.log("Template saved with ID:", templateId);
+   * ```
    */
   async saveTemplateFromFileStream({
     payload,
@@ -144,6 +193,21 @@ export class PogodocClient extends PogodocApiClient {
    * @param {any} [props.sampleData] - New sample data to be used for generating previews.
    * @param {string} [props.sourceCode] - A new link to the source code of the template.
    * @returns {Promise<string>} A promise that resolves with the content ID of the new template version.
+   *
+   * @example
+   * ```typescript
+   * const client = new PogodocClient();
+   * const contentId = await client.updateTemplate({
+   *   templateId: "some-template-id",
+   *   path: "./path/to/new-version.zip",
+   *   title: "My Updated Template",
+   *   description: "This is a template for a document",
+   *   type: "react",
+   *   categories: ["example", "template"],
+   *   sampleData: { name: "John Doe" },
+   * });
+   * console.log("Template updated. New content ID:", contentId);
+   * ```
    */
   async updateTemplate({
     path,
@@ -178,6 +242,28 @@ export class PogodocClient extends PogodocApiClient {
    * @param {any} [props.sampleData] - New sample data to be used for generating previews.
    * @param {string} [props.sourceCode] - A new link to the source code of the template.
    * @returns {Promise<string>} A promise that resolves with the content ID of the new template version.
+   *
+   * @example
+   * ```typescript
+   * import { createReadStream, statSync } from "fs";
+   *
+   * const client = new PogodocClient();
+   * const filePath = "./path/to/new-version.zip";
+   * const zipStream = createReadStream(filePath);
+   * const zipLength = statSync(filePath).size;
+   *
+   * const contentId = await client.updateTemplateFromFileStream({
+   *   templateId: "some-template-id",
+   *   payload: zipStream,
+   *   payloadLength: zipLength,
+   *   title: "My Updated Template",
+   *   description: "This is a template for a document",
+   *   type: "react",
+   *   categories: ["example", "template"],
+   *   sampleData: { name: "John Doe" },
+   * });
+   * console.log("Template updated. New content ID:", contentId);
+   * ```
    */
   async updateTemplateFromFileStream({
     payload,
@@ -237,6 +323,22 @@ export class PogodocClient extends PogodocApiClient {
    * @param {any} props.data - The data to populate the template with.
    * @param {RenderConfig} props.renderConfig - Configuration for the rendering process.
    * @returns {Promise<StartImmediateRenderResponse>} A promise that resolves with the presigned url of the generated document.
+   *
+   * @example
+   * ```typescript
+   * const client = new PogodocClient();
+   * const response = await client.generateDocumentImmediate({
+   *   // template: "<h1>Hello, <%= name %>!</h1>",
+   *   templateId: "some-template-id",
+   *   data: { name: "Jane Doe" },
+   *   renderConfig: {
+   *     type: "ejs",
+   *     target: "pdf"
+   *   }
+   * });
+   * // The response contains the URL to the generated document
+   * console.log("Generated document URL:", response.output.data.url);
+   * ```
    */
   async generateDocumentImmediate({
     template,
@@ -267,6 +369,20 @@ export class PogodocClient extends PogodocApiClient {
    * @param {any} props.data - The data to populate the template with.
    * @param {RenderConfig} props.renderConfig - Configuration for the rendering process.
    * @returns {Promise<GetJobStatusResponse>} A promise that resolves with the final job status, including the output URL.
+   *
+   * @example
+   * ```typescript
+   * const client = new PogodocClient();
+   * const result = await client.generateDocument({
+   *   templateId: "some-template-id",
+   *   data: { name: "Jane Doe" },
+   *   renderConfig: {
+   *     type: "react",
+   *     target: "pdf"
+   *   }
+   * });
+   * console.log("Generated document URL:", result.output?.data.url);
+   * ```
    */
   async generateDocument({
     template,
@@ -299,6 +415,20 @@ export class PogodocClient extends PogodocApiClient {
    * @param {any} props.data - The data to populate the template with.
    * @param {RenderConfig} props.renderConfig - Configuration for the rendering process.
    * @returns {Promise<StartRenderJobResponse>} A promise that resolves with the initial job information.
+   *
+   * @example
+   * ```typescript
+   * const client = new PogodocClient();
+   * const job = await client.startGenerateDocument({
+   *   templateId: "some-template-id",
+   *   data: { name: "Jane Doe" },
+   *   renderConfig: {
+   *     type: "react",
+   *     target: "pdf"
+   *   }
+   * });
+   * console.log("Started generation job with ID:", job.jobId);
+   * ```
    */
   async startGenerateDocument({
     template,
@@ -349,6 +479,21 @@ export class PogodocClient extends PogodocApiClient {
    * @param {number} [maxAttempts=60] - The maximum number of polling attempts.
    * @param {number} [intervalMs=500] - The interval in milliseconds between polling attempts.
    * @returns {Promise<GetJobStatusResponse>} A promise that resolves with the final job status.
+   *
+   * @example
+   * ```typescript
+   * const client = new PogodocClient();
+   * const job = await client.startGenerateDocument({
+   *   templateId: "some-template-id",
+   *   data: { name: "Jane Doe" },
+   *   renderConfig: {
+   *     type: "react",
+   *     target: "pdf"
+   *   }
+   * });
+   * const result = await client.pollForJobCompletion(job.jobId);
+   * console.log("Job finished. Document URL:", result.output?.data.url);
+   * ```
    */
   public async pollForJobCompletion(
     jobId: string,
