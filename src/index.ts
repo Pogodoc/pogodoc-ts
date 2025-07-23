@@ -198,7 +198,7 @@ export class PogodocClient extends PogodocApiClient {
    * ```typescript
    * const client = new PogodocClient();
    * const contentId = await client.updateTemplate({
-   *   templateId: "some-template-id",
+   *   templateId: "your-template-id",
    *   path: "./path/to/new-version.zip",
    *   title: "My Updated Template",
    *   description: "This is a template for a document",
@@ -253,7 +253,7 @@ export class PogodocClient extends PogodocApiClient {
    * const zipLength = statSync(filePath).size;
    *
    * const contentId = await client.updateTemplateFromFileStream({
-   *   templateId: "some-template-id",
+   *   templateId: "your-template-id",
    *   payload: zipStream,
    *   payloadLength: zipLength,
    *   title: "My Updated Template",
@@ -329,7 +329,7 @@ export class PogodocClient extends PogodocApiClient {
    * const client = new PogodocClient();
    * const response = await client.generateDocumentImmediate({
    *   // template: "<h1>Hello, <%= name %>!</h1>",
-   *   templateId: "some-template-id",
+   *   templateId: "your-template-id",
    *   data: { name: "Jane Doe" },
    *   renderConfig: {
    *     type: "ejs",
@@ -374,7 +374,7 @@ export class PogodocClient extends PogodocApiClient {
    * ```typescript
    * const client = new PogodocClient();
    * const result = await client.generateDocument({
-   *   templateId: "some-template-id",
+   *   templateId: "your-template-id",
    *   data: { name: "Jane Doe" },
    *   renderConfig: {
    *     type: "react",
@@ -420,7 +420,7 @@ export class PogodocClient extends PogodocApiClient {
    * ```typescript
    * const client = new PogodocClient();
    * const job = await client.startGenerateDocument({
-   *   templateId: "some-template-id",
+   *   templateId: "your-template-id",
    *   data: { name: "Jane Doe" },
    *   renderConfig: {
    *     type: "react",
@@ -484,7 +484,7 @@ export class PogodocClient extends PogodocApiClient {
    * ```typescript
    * const client = new PogodocClient();
    * const job = await client.startGenerateDocument({
-   *   templateId: "some-template-id",
+   *   templateId: "your-template-id",
    *   data: { name: "Jane Doe" },
    *   renderConfig: {
    *     type: "react",

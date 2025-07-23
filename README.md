@@ -21,11 +21,11 @@ import { PogodocClient } from "@pogodoc/sdk";
 
 async function main() {
   const client = new PogodocClient({
-    token: "YOUR-POGODOC-API-TOKEN"
+    token: "YOUR-POGODOC-API-TOKEN",
   });
 
   const response = await client.generateDocument({
-    templateId: "some-template-id",
+    templateId: "your-template-id",
     data: { name: "John Doe" },
     renderConfig: {
       type: "html",
