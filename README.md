@@ -18,24 +18,15 @@ To use the SDK you will need an API key which can be obtained from the [Pogodoc 
 
 ```ts
 import { PogodocClient } from "@pogodoc/sdk";
-import * as dotenv from "dotenv";
-
-dotenv.config();
 
 async function main() {
-  const client = new PogodocClient();
-
-  const sampleData = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "1234567890",
-    address: "123 Main St, Anytown, USA",
-    city: "Anytown",
-  };
+  const client = new PogodocClient({
+    token: "YOUR-POGODOC-API-TOKEN"
+  });
 
   const response = await client.generateDocument({
-    templateId: process.env.TEMPLATE_ID,
-    data: sampleData,
+    templateId: "some-template-id",
+    data: { name: "John Doe" },
     renderConfig: {
       type: "html",
       target: "pdf",
