@@ -30,6 +30,9 @@ async function main() {
     renderConfig: {
       type: "html",
       target: "pdf",
+      formatOpts: {
+        fromPage: 1,
+      },
     },
   });
 
