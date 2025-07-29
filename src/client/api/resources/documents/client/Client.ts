@@ -195,11 +195,11 @@ export class Documents {
      *
      * @example
      *     await client.documents.startImmediateRender({
+     *         type: "docx",
+     *         target: "pdf",
      *         data: {
      *             "key": "value"
-     *         },
-     *         type: "docx",
-     *         target: "pdf"
+     *         }
      *     })
      */
     public startImmediateRender(

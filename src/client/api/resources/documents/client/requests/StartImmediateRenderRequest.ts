@@ -5,16 +5,14 @@
 /**
  * @example
  *     {
+ *         type: "docx",
+ *         target: "pdf",
  *         data: {
  *             "key": "value"
- *         },
- *         type: "docx",
- *         target: "pdf"
+ *         }
  *     }
  */
 export interface StartImmediateRenderRequest {
-    /** Sample data for the template */
-    data: Record<string, unknown>;
     /** Type of template to be rendered */
     type: StartImmediateRenderRequest.Type;
     /** Type of output to be rendered */
@@ -23,8 +21,11 @@ export interface StartImmediateRenderRequest {
     templateId?: string;
     /** Format options for the rendered document */
     formatOpts?: StartImmediateRenderRequest.FormatOpts;
+    /** Sample data for the template */
+    data: Record<string, unknown>;
     /** index.html or ejs file of the template as a string */
     template?: string;
+    uploadPresignedS3Url?: string;
 }
 
 export namespace StartImmediateRenderRequest {
