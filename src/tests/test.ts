@@ -34,7 +34,7 @@ async function main() {
 
   console.log("documentImmediate", documentImmediate);
 
-  const startDocumentResponse = await Pogodoc.startGenerateDocument({
+  const jobId = await Pogodoc.startGenerateDocument({
     templateId,
     data: { name: "John Doe" },
     renderConfig: {
@@ -43,9 +43,7 @@ async function main() {
     },
   });
 
-  const jobStatus = await Pogodoc.pollForJobCompletion(
-    startDocumentResponse.jobId
-  );
+  const jobStatus = await Pogodoc.pollForJobCompletion(jobId);
 
   console.log("startGenerateDocument jobStatus", jobStatus);
 }

@@ -390,14 +390,14 @@ export class PogodocClient extends PogodocApiClient {
     data,
     renderConfig,
   }: GenerateDocumentProps): Promise<GetJobStatusResponse> {
-    const initResponse = await this.startGenerateDocument({
+    const jobId = await this.startGenerateDocument({
       template,
       templateId,
       data,
       renderConfig,
     });
 
-    return await this.pollForJobCompletion(initResponse.jobId);
+    return await this.pollForJobCompletion(jobId);
   }
 
   /**
@@ -414,12 +414,12 @@ export class PogodocClient extends PogodocApiClient {
    * @param {string} [props.template] - The raw HTML template string to use for rendering.
    * @param {any} props.data - The data to populate the template with.
    * @param {RenderConfig} props.renderConfig - Configuration for the rendering process.
-   * @returns {Promise<StartRenderJobResponse>} A promise that resolves with the initial job information.
+   * @returns {Promise<string>} A promise that resolves with the job ID of the generated document.
    *
    * @example
    * ```typescript
    * const client = new PogodocClient();
-   * const job = await client.startGenerateDocument({
+   * const jobId = await client.startGenerateDocument({
    *   templateId: "your-template-id",
    *   data: { name: "Jane Doe" },
    *   renderConfig: {
@@ -427,7 +427,7 @@ export class PogodocClient extends PogodocApiClient {
    *     target: "pdf"
    *   }
    * });
-   * console.log("Started generation job with ID:", job.jobId);
+   * console.log("Started generation job with ID:", jobId);
    * ```
    */
   async startGenerateDocument({
@@ -435,7 +435,7 @@ export class PogodocClient extends PogodocApiClient {
     templateId,
     data,
     renderConfig,
-  }: GenerateDocumentProps): Promise<StartRenderJobResponse> {
+  }: GenerateDocumentProps): Promise<string> {
     const initRequest: InitializeRenderJobRequest = {
       type: renderConfig.type,
       target: renderConfig.target,
@@ -466,9 +466,11 @@ export class PogodocClient extends PogodocApiClient {
       );
     }
 
-    return await this.documents.startRenderJob(initResponse.jobId, {
+    const response = await this.documents.startRenderJob(initResponse.jobId, {
       uploadPresignedS3Url: renderConfig.personalUploadPresignedS3Url,
     });
+
+    return response.jobId;
   }
 
   /**
@@ -483,7 +485,7 @@ export class PogodocClient extends PogodocApiClient {
    * @example
    * ```typescript
    * const client = new PogodocClient();
-   * const job = await client.startGenerateDocument({
+   * const jobId = await client.startGenerateDocument({
    *   templateId: "your-template-id",
    *   data: { name: "Jane Doe" },
    *   renderConfig: {
@@ -491,7 +493,7 @@ export class PogodocClient extends PogodocApiClient {
    *     target: "pdf"
    *   }
    * });
-   * const result = await client.pollForJobCompletion(job.jobId);
+   * const result = await client.pollForJobCompletion(jobId);
    * console.log("Job finished. Document URL:", result.output?.data.url);
    * ```
    */
