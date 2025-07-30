@@ -9,7 +9,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "github.com/Pogodoc/pogodoc-ts"
+    "url": "https://github.com/Pogodoc/pogodoc-ts"
   },
   "type": "commonjs",
   "main": "./index.js",
