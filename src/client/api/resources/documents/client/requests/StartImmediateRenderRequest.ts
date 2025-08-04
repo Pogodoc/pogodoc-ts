@@ -25,6 +25,7 @@ export interface StartImmediateRenderRequest {
     data: Record<string, unknown>;
     /** index.html or ejs file of the template as a string */
     template?: string;
+    /** Presigned URL to upload the data for the render job to S3 */
     uploadPresignedS3Url?: string;
 }
 
