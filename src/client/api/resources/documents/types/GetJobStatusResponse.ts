@@ -3,44 +3,53 @@
  */
 
 export interface GetJobStatusResponse {
-    /** Type of template to be rendered */
-    type: GetJobStatusResponse.Type;
     /** ID of the render job */
     jobId: string;
-    /** Type of output to be rendered */
-    target: GetJobStatusResponse.Target;
-    output?: GetJobStatusResponse.Output;
-    success?: boolean;
+    /** ID of the template being used */
+    templateId?: string;
+    /** Target of the render job */
+    target: string;
+    /** Presigned URL to upload the rendered output to S3 */
+    uploadPresignedS3Url?: string;
+    /** Format options for the rendered document */
+    formatOpts?: GetJobStatusResponse.FormatOpts;
+    /** Status of the render job */
     status?: string;
+    /** Whether the render job was successful */
+    success?: boolean;
+    output?: GetJobStatusResponse.Output;
+    /** Error that occurred during render */
+    error?: string;
 }
 
 export namespace GetJobStatusResponse {
     /**
-     * Type of template to be rendered
+     * Format options for the rendered document
      */
-    export type Type = "docx" | "xlsx" | "pptx" | "ejs" | "html" | "latex" | "react";
-    export const Type = {
-        Docx: "docx",
-        Xlsx: "xlsx",
-        Pptx: "pptx",
-        Ejs: "ejs",
-        Html: "html",
-        Latex: "latex",
-        React: "react",
-    } as const;
-    /**
-     * Type of output to be rendered
-     */
-    export type Target = "pdf" | "html" | "docx" | "xlsx" | "pptx" | "png" | "jpg";
-    export const Target = {
-        Pdf: "pdf",
-        Html: "html",
-        Docx: "docx",
-        Xlsx: "xlsx",
-        Pptx: "pptx",
-        Png: "png",
-        Jpg: "jpg",
-    } as const;
+    export interface FormatOpts {
+        fromPage?: number;
+        toPage?: number;
+        format?: FormatOpts.Format;
+        /** Selector to wait for to know when the page is loaded and can be saved as pdf, png, etc. */
+        waitForSelector?: string;
+    }
+
+    export namespace FormatOpts {
+        export type Format = "letter" | "legal" | "tabloid" | "ledger" | "a0" | "a1" | "a2" | "a3" | "a4" | "a5" | "a6";
+        export const Format = {
+            Letter: "letter",
+            Legal: "legal",
+            Tabloid: "tabloid",
+            Ledger: "ledger",
+            A0: "a0",
+            A1: "a1",
+            A2: "a2",
+            A3: "a3",
+            A4: "a4",
+            A5: "a5",
+            A6: "a6",
+        } as const;
+    }
 
     export interface Output {
         data: Output.Data;
