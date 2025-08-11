@@ -14,7 +14,7 @@ export interface GetJobStatusResponse {
     /** Format options for the rendered document */
     formatOpts?: GetJobStatusResponse.FormatOpts;
     /** Status of the render job */
-    status?: string;
+    status: string;
     /** Whether the render job was successful */
     success?: boolean;
     output?: GetJobStatusResponse.Output;
