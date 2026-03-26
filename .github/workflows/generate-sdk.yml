@@ -1,0 +1,71 @@
+name: Regenerate SDK from OpenAPI Spec
+
+on:
+  repository_dispatch:
+    types: [regenerate-sdk]
+  workflow_dispatch:
+    inputs:
+      spec_url:
+        description: "URL to download the OpenAPI spec from"
+        required: false
+        default: "https://pogodoc-example-data-public.s3.eu-west-1.amazonaws.com/openApiSpec.json"
+
+concurrency:
+  group: sdk-generation
+  cancel-in-progress: true
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Determine spec URL
+        id: spec
+        run: |
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            echo "url=${{ github.event.client_payload.spec_url }}" >> $GITHUB_OUTPUT
+            echo "commit=${{ github.event.client_payload.source_commit }}" >> $GITHUB_OUTPUT
+          else
+            echo "url=${{ inputs.spec_url }}" >> $GITHUB_OUTPUT
+            echo "commit=manual" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download OpenAPI spec
+        run: |
+          mkdir -p fern/openapi
+          curl -fSL "${{ steps.spec.outputs.url }}" -o fern/openapi/openApiSpec.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+
+      - name: Install Fern CLI
+        run: npm install -g fern-api@0.65.18
+
+      - name: Generate SDK
+        working-directory: ./fern
+        run: fern generate --local --log-level debug
+
+      - name: Validate build
+        run: |
+          npm ci
+          npm run build
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "[CHORE] regenerate SDK from OpenAPI spec"
+          title: "[CHORE] regenerate TypeScript SDK"
+          body: |
+            Automated SDK regeneration triggered by OpenAPI spec change.
+
+            **Source commit:** `${{ steps.spec.outputs.commit }}`
+            **Spec URL:** ${{ steps.spec.outputs.url }}
+          branch: chore/regenerate-sdk
+          delete-branch: true
