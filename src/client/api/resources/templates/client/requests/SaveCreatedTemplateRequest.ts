@@ -57,13 +57,14 @@ export namespace SaveCreatedTemplateRequest {
         export type Categories = Categories.Item[];
 
         export namespace Categories {
-            export type Item = "invoice" | "mail" | "report" | "cv" | "other";
+            export type Item = "invoice" | "mail" | "report" | "cv" | "other" | "favorite";
             export const Item = {
                 Invoice: "invoice",
                 Mail: "mail",
                 Report: "report",
                 Cv: "cv",
                 Other: "other",
+                Favorite: "favorite",
             } as const;
         }
     }
