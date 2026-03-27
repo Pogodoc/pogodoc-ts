@@ -1,0 +1,2030 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Pogodoc API",
+    "description": "API for Pogodoc document and template management service. Provides endpoints for rendering documents, managing templates, generating previews, and handling API tokens.",
+    "version": "0.1.0"
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "Api Token"
+      }
+    },
+    "schemas": {}
+  },
+  "paths": {
+    "/templates/init": {
+      "get": {
+        "operationId": "initializeTemplateCreation",
+        "summary": "Initialize Template Creation",
+        "tags": [
+          "Templates"
+        ],
+        "description": "Initializes template creation by generating a unique ID and providing a presigned URL for template ZIP upload. Sets unfinished tag for tracking incomplete templates.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "templateId": {
+                      "description": "ID of the template",
+                      "type": "string"
+                    },
+                    "presignedTemplateUploadUrl": {
+                      "description": "Presigned URL to upload the template to S3",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "templateId",
+                    "presignedTemplateUploadUrl"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/templates/{templateId}": {
+      "put": {
+        "operationId": "updateTemplate",
+        "summary": "Update Template",
+        "tags": [
+          "Templates"
+        ],
+        "description": "Updates template content, handles S3 storage cleanup for old content, updates template metadata in Strapi, and manages preview files. Removes unfinished tags after successful update.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "allOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "templateInfo": {
+                        "type": "object",
+                        "properties": {
+                          "title": {
+                            "description": "Title of the template",
+                            "type": "string"
+                          },
+                          "description": {
+                            "description": "Description of the template",
+                            "type": "string"
+                          },
+                          "type": {
+                            "description": "Type of template to be rendered",
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "docx"
+                                ]
+                              },
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "xlsx"
+                                ]
+                              },
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "pptx"
+                                ]
+                              },
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "ejs"
+                                ]
+                              },
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "html"
+                                ]
+                              },
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "latex"
+                                ]
+                              },
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "react"
+                                ]
+                              }
+                            ]
+                          },
+                          "sampleData": {
+                            "description": "Sample data for the template",
+                            "type": "object",
+                            "additionalProperties": {}
+                          },
+                          "sourceCode": {
+                            "anyOf": [
+                              {
+                                "type": "null"
+                              },
+                              {
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "categories": {
+                            "description": "Categories of the template",
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "enum": [
+                                    "invoice"
+                                  ]
+                                },
+                                {
+                                  "type": "string",
+                                  "enum": [
+                                    "mail"
+                                  ]
+                                },
+                                {
+                                  "type": "string",
+                                  "enum": [
+                                    "report"
+                                  ]
+                                },
+                                {
+                                  "type": "string",
+                                  "enum": [
+                                    "cv"
+                                  ]
+                                },
+                                {
+                                  "type": "string",
+                                  "enum": [
+                                    "other"
+                                  ]
+                                },
+                                {
+                                  "type": "string",
+                                  "enum": [
+                                    "favorite"
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "title",
+                          "description",
+                          "type",
+                          "sampleData",
+                          "categories"
+                        ]
+                      },
+                      "previewIds": {
+                        "type": "object",
+                        "properties": {
+                          "pngJobId": {
+                            "description": "ID of the job for the PNG preview",
+                            "type": "string"
+                          },
+                          "pdfJobId": {
+                            "description": "ID of the job for the PDF preview",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "pngJobId",
+                          "pdfJobId"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "templateInfo",
+                      "previewIds"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "contentId": {
+                        "description": "ID by which the new template content is saved",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "contentId"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "templateId",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "newContentId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "newContentId"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "saveCreatedTemplate",
+        "summary": "Save New Template",
+        "tags": [
+          "Templates"
+        ],
+        "description": "Finalizes template creation by saving template info to Strapi, copying preview files to permanent storage, and creating template index. Removes unfinished tag upon completion.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "templateInfo": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "description": "Title of the template",
+                        "type": "string"
+                      },
+                      "description": {
+                        "description": "Description of the template",
+                        "type": "string"
+                      },
+                      "type": {
+                        "description": "Type of template to be rendered",
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "enum": [
+                              "docx"
+                            ]
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "xlsx"
+                            ]
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "pptx"
+                            ]
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "ejs"
+                            ]
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "html"
+                            ]
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "latex"
+                            ]
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "react"
+                            ]
+                          }
+                        ]
+                      },
+                      "sampleData": {
+                        "description": "Sample data for the template",
+                        "type": "object",
+                        "additionalProperties": {}
+                      },
+                      "sourceCode": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "categories": {
+                        "description": "Categories of the template",
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "enum": [
+                                "invoice"
+                              ]
+                            },
+                            {
+                              "type": "string",
+                              "enum": [
+                                "mail"
+                              ]
+                            },
+                            {
+                              "type": "string",
+                              "enum": [
+                                "report"
+                              ]
+                            },
+                            {
+                              "type": "string",
+                              "enum": [
+                                "cv"
+                              ]
+                            },
+                            {
+                              "type": "string",
+                              "enum": [
+                                "other"
+                              ]
+                            },
+                            {
+                              "type": "string",
+                              "enum": [
+                                "favorite"
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "title",
+                      "description",
+                      "type",
+                      "sampleData",
+                      "categories"
+                    ]
+                  },
+                  "previewIds": {
+                    "type": "object",
+                    "properties": {
+                      "pngJobId": {
+                        "description": "ID of the job for the PNG preview",
+                        "type": "string"
+                      },
+                      "pdfJobId": {
+                        "description": "ID of the job for the PDF preview",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "pngJobId",
+                      "pdfJobId"
+                    ]
+                  }
+                },
+                "required": [
+                  "templateInfo",
+                  "previewIds"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "templateId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Template created successfully"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteTemplate",
+        "summary": "Delete Template",
+        "tags": [
+          "Templates"
+        ],
+        "description": "Deletes a template from Strapi and associated S3 storage. Removes all associated files and metadata.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "templateId",
+            "required": true,
+            "description": "ID of the template to be deleted"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "templateId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "templateId"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/templates/{templateId}/unzip": {
+      "patch": {
+        "operationId": "extractTemplateFiles",
+        "summary": "Extract Template Files",
+        "tags": [
+          "Templates"
+        ],
+        "description": "Extracts contents from an uploaded template ZIP file and stores individual files in the appropriate S3 storage structure.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "templateId",
+            "required": true,
+            "description": "ID of the template to be used"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Template files extracted successfully"
+          }
+        }
+      }
+    },
+    "/templates/{templateId}/render-previews": {
+      "post": {
+        "operationId": "generateTemplatePreviews",
+        "summary": "Generate Template Previews",
+        "tags": [
+          "Templates"
+        ],
+        "description": "Creates both PNG and PDF preview files for template visualization. Generates previews in parallel and returns URLs for both formats.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "description": "Type of template to be rendered",
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "docx"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "xlsx"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "pptx"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "ejs"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "html"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "latex"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "react"
+                        ]
+                      }
+                    ]
+                  },
+                  "data": {
+                    "description": "Sample data for the template",
+                    "type": "object",
+                    "additionalProperties": {}
+                  },
+                  "formatOpts": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "description": "Format options for the rendered document",
+                        "allOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "fromPage": {
+                                "anyOf": [
+                                  {
+                                    "type": "null"
+                                  },
+                                  {
+                                    "type": "number"
+                                  }
+                                ]
+                              },
+                              "toPage": {
+                                "anyOf": [
+                                  {
+                                    "type": "null"
+                                  },
+                                  {
+                                    "type": "number"
+                                  }
+                                ]
+                              },
+                              "format": {
+                                "anyOf": [
+                                  {
+                                    "type": "null"
+                                  },
+                                  {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "letter"
+                                        ]
+                                      },
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "legal"
+                                        ]
+                                      },
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "tabloid"
+                                        ]
+                                      },
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "ledger"
+                                        ]
+                                      },
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "a0"
+                                        ]
+                                      },
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "a1"
+                                        ]
+                                      },
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "a2"
+                                        ]
+                                      },
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "a3"
+                                        ]
+                                      },
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "a4"
+                                        ]
+                                      },
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "a5"
+                                        ]
+                                      },
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "a6"
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              "waitForSelector": {
+                                "anyOf": [
+                                  {
+                                    "type": "null"
+                                  },
+                                  {
+                                    "description": "Selector to wait for to know when the page is loaded and can be saved as pdf, png, etc.",
+                                    "type": "string"
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": {}
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "type",
+                  "data"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "templateId",
+            "required": true,
+            "description": "ID of the template to be used"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "pngPreview": {
+                      "type": "object",
+                      "properties": {
+                        "url": {
+                          "description": "URL of the rendered preview",
+                          "type": "string"
+                        },
+                        "jobId": {
+                          "description": "ID of the render job",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "url",
+                        "jobId"
+                      ]
+                    },
+                    "pdfPreview": {
+                      "type": "object",
+                      "properties": {
+                        "url": {
+                          "description": "URL of the rendered preview",
+                          "type": "string"
+                        },
+                        "jobId": {
+                          "description": "ID of the render job",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "url",
+                        "jobId"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "pngPreview",
+                    "pdfPreview"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/templates/{templateId}/presigned-url": {
+      "get": {
+        "operationId": "generatePresignedGetUrl",
+        "summary": "Generate Presigned URL",
+        "tags": [
+          "Templates"
+        ],
+        "description": "Generates a presigned URL for template access. Used for downloading template files from S3 storage.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "templateId",
+            "required": true,
+            "description": "ID of the template that is being downloaded"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "presignedUrl": {
+                      "description": "Presigned URL to get the template",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "presignedUrl"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/templates/{templateId}/index-html": {
+      "get": {
+        "operationId": "getTemplateIndexHtml",
+        "summary": "Get Template Index HTML",
+        "tags": [
+          "Templates"
+        ],
+        "description": "Retrieves the template index.html file from S3 storage. Used for rendering the template in the browser.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "templateId",
+            "required": true,
+            "description": "ID of the template to be used"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "indexHtml": {
+                      "description": "Index.html file of the template",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "indexHtml"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "uploadTemplateIndexHtml",
+        "summary": "Upload Template Index HTML",
+        "tags": [
+          "Templates"
+        ],
+        "description": "Uploads the template index.html file to S3 storage. Used for rendering the template in the browser.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "indexHtml": {
+                    "description": "New index.html file of the template",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "indexHtml"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "templateId",
+            "required": true,
+            "description": "ID of the template to be used"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Template index.html uploaded successfully"
+          }
+        }
+      }
+    },
+    "/templates/{templateId}/clone": {
+      "post": {
+        "operationId": "cloneTemplate",
+        "summary": "Clone Template",
+        "tags": [
+          "Templates"
+        ],
+        "description": "Creates a new template by duplicating an existing template's content and metadata. Includes copying preview files and template index.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "templateId",
+            "required": true,
+            "description": "ID of the template to be used"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "newTemplateId": {
+                      "description": "ID of the new template",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "newTemplateId"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/documents/init": {
+      "post": {
+        "operationId": "initializeRenderJob",
+        "summary": "Initialize Render Job",
+        "tags": [
+          "Documents"
+        ],
+        "description": "Creates a new render job with a unique ID, sets up S3 storage for template and data files, and generates presigned upload URLs if needed. Requires subscription check.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "allOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "description": "Sample data for the template",
+                            "type": "object",
+                            "additionalProperties": {}
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "description": "Type of template to be rendered",
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "enum": [
+                              "docx"
+                            ]
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "xlsx"
+                            ]
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "pptx"
+                            ]
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "ejs"
+                            ]
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "html"
+                            ]
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "latex"
+                            ]
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "react"
+                            ]
+                          }
+                        ]
+                      },
+                      "target": {
+                        "description": "Type of output to be rendered",
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "enum": [
+                              "pdf"
+                            ]
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "html"
+                            ]
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "docx"
+                            ]
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "xlsx"
+                            ]
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "pptx"
+                            ]
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "png"
+                            ]
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "jpg"
+                            ]
+                          }
+                        ]
+                      },
+                      "templateId": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "description": "ID of the template to be used",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "formatOpts": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "description": "Format options for the rendered document",
+                            "allOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "fromPage": {
+                                    "anyOf": [
+                                      {
+                                        "type": "null"
+                                      },
+                                      {
+                                        "type": "number"
+                                      }
+                                    ]
+                                  },
+                                  "toPage": {
+                                    "anyOf": [
+                                      {
+                                        "type": "null"
+                                      },
+                                      {
+                                        "type": "number"
+                                      }
+                                    ]
+                                  },
+                                  "format": {
+                                    "anyOf": [
+                                      {
+                                        "type": "null"
+                                      },
+                                      {
+                                        "anyOf": [
+                                          {
+                                            "type": "string",
+                                            "enum": [
+                                              "letter"
+                                            ]
+                                          },
+                                          {
+                                            "type": "string",
+                                            "enum": [
+                                              "legal"
+                                            ]
+                                          },
+                                          {
+                                            "type": "string",
+                                            "enum": [
+                                              "tabloid"
+                                            ]
+                                          },
+                                          {
+                                            "type": "string",
+                                            "enum": [
+                                              "ledger"
+                                            ]
+                                          },
+                                          {
+                                            "type": "string",
+                                            "enum": [
+                                              "a0"
+                                            ]
+                                          },
+                                          {
+                                            "type": "string",
+                                            "enum": [
+                                              "a1"
+                                            ]
+                                          },
+                                          {
+                                            "type": "string",
+                                            "enum": [
+                                              "a2"
+                                            ]
+                                          },
+                                          {
+                                            "type": "string",
+                                            "enum": [
+                                              "a3"
+                                            ]
+                                          },
+                                          {
+                                            "type": "string",
+                                            "enum": [
+                                              "a4"
+                                            ]
+                                          },
+                                          {
+                                            "type": "string",
+                                            "enum": [
+                                              "a5"
+                                            ]
+                                          },
+                                          {
+                                            "type": "string",
+                                            "enum": [
+                                              "a6"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  "waitForSelector": {
+                                    "anyOf": [
+                                      {
+                                        "type": "null"
+                                      },
+                                      {
+                                        "description": "Selector to wait for to know when the page is loaded and can be saved as pdf, png, etc.",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                              {
+                                "type": "object",
+                                "additionalProperties": {}
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "target"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobId": {
+                      "description": "ID of the render job",
+                      "type": "string"
+                    },
+                    "target": {
+                      "description": "Type of output to be rendered",
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "pdf"
+                          ]
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "html"
+                          ]
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "docx"
+                          ]
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "xlsx"
+                          ]
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "pptx"
+                          ]
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "png"
+                          ]
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "jpg"
+                          ]
+                        }
+                      ]
+                    },
+                    "presignedDataUploadUrl": {
+                      "description": "Presigned URL to upload the data for the render job to S3",
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "presignedTemplateUploadUrl": {
+                      "description": "Presigned URL to upload the template for the render job to S3. Only works with EJS templates",
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "jobId",
+                    "target",
+                    "presignedDataUploadUrl",
+                    "presignedTemplateUploadUrl"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/documents/{jobId}/render": {
+      "post": {
+        "operationId": "startRenderJob",
+        "summary": "Start Render Job",
+        "tags": [
+          "Documents"
+        ],
+        "description": "Takes a previously initialized job, updates its status to in-progress, and triggers the rendering process using Puppeteer. Can optionally wait for render completion.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "shouldWaitForRenderCompletion": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "description": "Whether to wait for the render job to complete, if false, the job will be returned immediately",
+                        "type": "boolean"
+                      }
+                    ]
+                  },
+                  "uploadPresignedS3Url": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "jobId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobId": {
+                      "description": "ID of the render job",
+                      "type": "string"
+                    },
+                    "target": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "description": "Type of output to be rendered",
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "enum": [
+                                "pdf"
+                              ]
+                            },
+                            {
+                              "type": "string",
+                              "enum": [
+                                "html"
+                              ]
+                            },
+                            {
+                              "type": "string",
+                              "enum": [
+                                "docx"
+                              ]
+                            },
+                            {
+                              "type": "string",
+                              "enum": [
+                                "xlsx"
+                              ]
+                            },
+                            {
+                              "type": "string",
+                              "enum": [
+                                "pptx"
+                              ]
+                            },
+                            {
+                              "type": "string",
+                              "enum": [
+                                "png"
+                              ]
+                            },
+                            {
+                              "type": "string",
+                              "enum": [
+                                "jpg"
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    "status": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "description": "Status of the render job",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "success": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "description": "Whether the render job was successful",
+                          "type": "boolean"
+                        }
+                      ]
+                    },
+                    "output": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "url": {
+                                  "description": "URL of the rendered output",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "url"
+                              ]
+                            },
+                            "metadata": {
+                              "type": "object",
+                              "properties": {
+                                "renderTime": {
+                                  "description": "Time taken to render the output",
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "renderTime"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "data",
+                            "metadata"
+                          ]
+                        }
+                      ]
+                    },
+                    "error": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "description": "Error that occurred during render",
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "jobId"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/documents/immediate-render": {
+      "post": {
+        "operationId": "startImmediateRender",
+        "summary": "Immediate Render",
+        "tags": [
+          "Documents"
+        ],
+        "description": "Combines initialization and rendering in one step. Creates a job, uploads template/data directly, starts rendering, and adds the document to Strapi. Requires subscription check.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "description": "Type of template to be rendered",
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "docx"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "xlsx"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "pptx"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "ejs"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "html"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "latex"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "react"
+                        ]
+                      }
+                    ]
+                  },
+                  "target": {
+                    "description": "Type of output to be rendered",
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "pdf"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "html"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "docx"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "xlsx"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "pptx"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "png"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "jpg"
+                        ]
+                      }
+                    ]
+                  },
+                  "templateId": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "description": "ID of the template to be used",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "formatOpts": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "description": "Format options for the rendered document",
+                        "allOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "fromPage": {
+                                "anyOf": [
+                                  {
+                                    "type": "null"
+                                  },
+                                  {
+                                    "type": "number"
+                                  }
+                                ]
+                              },
+                              "toPage": {
+                                "anyOf": [
+                                  {
+                                    "type": "null"
+                                  },
+                                  {
+                                    "type": "number"
+                                  }
+                                ]
+                              },
+                              "format": {
+                                "anyOf": [
+                                  {
+                                    "type": "null"
+                                  },
+                                  {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "letter"
+                                        ]
+                                      },
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "legal"
+                                        ]
+                                      },
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "tabloid"
+                                        ]
+                                      },
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "ledger"
+                                        ]
+                                      },
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "a0"
+                                        ]
+                                      },
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "a1"
+                                        ]
+                                      },
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "a2"
+                                        ]
+                                      },
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "a3"
+                                        ]
+                                      },
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "a4"
+                                        ]
+                                      },
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "a5"
+                                        ]
+                                      },
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "a6"
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              "waitForSelector": {
+                                "anyOf": [
+                                  {
+                                    "type": "null"
+                                  },
+                                  {
+                                    "description": "Selector to wait for to know when the page is loaded and can be saved as pdf, png, etc.",
+                                    "type": "string"
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": {}
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "data": {
+                    "description": "Sample data for the template",
+                    "type": "object",
+                    "additionalProperties": {}
+                  },
+                  "template": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "description": "index.html or ejs file of the template as a string",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "uploadPresignedS3Url": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "description": "Presigned URL to upload the data for the render job to S3",
+                        "type": "string"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "type",
+                  "target",
+                  "data"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "description": "URL of the rendered output",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "url"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs/{jobId}": {
+      "get": {
+        "operationId": "getJobStatus",
+        "summary": "Get Job Status",
+        "tags": [
+          "Documents"
+        ],
+        "description": "Fetches detailed job information from S3 storage including job status, template ID, target format, and output details if available.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "jobId",
+            "required": true,
+            "description": "ID of the render job"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobId": {
+                      "description": "ID of the render job",
+                      "type": "string"
+                    },
+                    "target": {
+                      "description": "Target of the render job",
+                      "type": "string"
+                    },
+                    "status": {
+                      "description": "Status of the render job",
+                      "type": "string"
+                    },
+                    "success": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "description": "Whether the render job was successful",
+                          "type": "boolean"
+                        }
+                      ]
+                    },
+                    "output": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "url": {
+                                  "description": "URL of the rendered output",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "url"
+                              ]
+                            },
+                            "metadata": {
+                              "type": "object",
+                              "properties": {
+                                "renderTime": {
+                                  "description": "Time taken to render the output",
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "renderTime"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "data",
+                            "metadata"
+                          ]
+                        }
+                      ]
+                    },
+                    "error": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "description": "Error that occurred during render",
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "jobId",
+                    "target",
+                    "status"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.pogodoc.com/v1",
+      "description": "Pogodoc API"
+    }
+  ]
+}
