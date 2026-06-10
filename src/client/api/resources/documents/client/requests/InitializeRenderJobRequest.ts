@@ -59,6 +59,8 @@ export namespace InitializeRenderJobRequest {
         format?: FormatOpts.Format;
         /** Selector to wait for to know when the page is loaded and can be saved as pdf, png, etc. */
         waitForSelector?: string;
+        orientation?: FormatOpts.Orientation;
+        dimensions?: FormatOpts.Dimensions;
     }
 
     export namespace FormatOpts {
@@ -76,5 +78,15 @@ export namespace InitializeRenderJobRequest {
             A5: "a5",
             A6: "a6",
         } as const;
+        export type Orientation = "landscape" | "portrait";
+        export const Orientation = {
+            Landscape: "landscape",
+            Portrait: "portrait",
+        } as const;
+
+        export interface Dimensions {
+            width: number;
+            height: number;
+        }
     }
 }
