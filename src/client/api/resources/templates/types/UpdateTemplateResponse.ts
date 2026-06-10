@@ -3,5 +3,5 @@
  */
 
 export interface UpdateTemplateResponse {
-    newContentId: string;
+    newContentId?: string;
 }

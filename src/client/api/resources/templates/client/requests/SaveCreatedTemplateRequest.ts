@@ -38,6 +38,8 @@ export namespace SaveCreatedTemplateRequest {
         sourceCode?: string;
         /** Categories of the template */
         categories: TemplateInfo.Categories.Item[];
+        orientation?: TemplateInfo.Orientation;
+        dimensions?: TemplateInfo.Dimensions;
     }
 
     export namespace TemplateInfo {
@@ -57,14 +59,59 @@ export namespace SaveCreatedTemplateRequest {
         export type Categories = Categories.Item[];
 
         export namespace Categories {
-            export type Item = "invoice" | "mail" | "report" | "cv" | "other";
+            /**
+             * Category of the template
+             */
+            export type Item =
+                | "invoice"
+                | "mail"
+                | "report"
+                | "cv"
+                | "receipt"
+                | "order"
+                | "contract"
+                | "certificate"
+                | "statement"
+                | "brochure"
+                | "warranty"
+                | "poster"
+                | "menu"
+                | "catalog"
+                | "packaging"
+                | "advertisement"
+                | "other"
+                | "favorite";
             export const Item = {
                 Invoice: "invoice",
                 Mail: "mail",
                 Report: "report",
                 Cv: "cv",
+                Receipt: "receipt",
+                Order: "order",
+                Contract: "contract",
+                Certificate: "certificate",
+                Statement: "statement",
+                Brochure: "brochure",
+                Warranty: "warranty",
+                Poster: "poster",
+                Menu: "menu",
+                Catalog: "catalog",
+                Packaging: "packaging",
+                Advertisement: "advertisement",
                 Other: "other",
+                Favorite: "favorite",
             } as const;
+        }
+
+        export type Orientation = "landscape" | "portrait";
+        export const Orientation = {
+            Landscape: "landscape",
+            Portrait: "portrait",
+        } as const;
+
+        export interface Dimensions {
+            width: number;
+            height: number;
         }
     }
 

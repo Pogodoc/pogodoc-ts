@@ -105,6 +105,72 @@ export class Templates {
     }
 
     /**
+     * Fetches a single template by its ID for the authenticated user.
+     *
+     * @param {string} templateId - UUID of the template
+     * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @example
+     *     await client.templates.getTemplateById("templateId")
+     */
+    public getTemplateById(
+        templateId: string,
+        requestOptions?: Templates.RequestOptions,
+    ): core.HttpResponsePromise<PogodocApi.GetTemplateByIdResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__getTemplateById(templateId, requestOptions));
+    }
+
+    private async __getTemplateById(
+        templateId: string,
+        requestOptions?: Templates.RequestOptions,
+    ): Promise<core.WithRawResponse<PogodocApi.GetTemplateByIdResponse>> {
+        const _response = await core.fetcher({
+            url: urlJoin(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.PogodocApiEnvironment.Default,
+                `templates/${encodeURIComponent(templateId)}`,
+            ),
+            method: "GET",
+            headers: mergeHeaders(
+                this._options?.headers,
+                mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+                requestOptions?.headers,
+            ),
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: _response.body as PogodocApi.GetTemplateByIdResponse, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            throw new errors.PogodocApiError({
+                statusCode: _response.error.statusCode,
+                body: _response.error.body,
+                rawResponse: _response.rawResponse,
+            });
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.PogodocApiError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.PogodocApiTimeoutError("Timeout exceeded when calling GET /templates/{templateId}.");
+            case "unknown":
+                throw new errors.PogodocApiError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
      * Finalizes template creation by saving template info to Strapi, copying preview files to permanent storage, and creating template index. Removes unfinished tag upon completion.
      *
      * @param {string} templateId
@@ -198,26 +264,11 @@ export class Templates {
      * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.templates.updateTemplate("templateId", {
-     *         templateInfo: {
-     *             title: "title",
-     *             description: "description",
-     *             type: "docx",
-     *             sampleData: {
-     *                 "key": "value"
-     *             },
-     *             categories: ["invoice"]
-     *         },
-     *         previewIds: {
-     *             pngJobId: "pngJobId",
-     *             pdfJobId: "pdfJobId"
-     *         },
-     *         contentId: "contentId"
-     *     })
+     *     await client.templates.updateTemplate("templateId")
      */
     public updateTemplate(
         templateId: string,
-        request: PogodocApi.UpdateTemplateRequest,
+        request: PogodocApi.UpdateTemplateRequest = {},
         requestOptions?: Templates.RequestOptions,
     ): core.HttpResponsePromise<PogodocApi.UpdateTemplateResponse> {
         return core.HttpResponsePromise.fromPromise(this.__updateTemplate(templateId, request, requestOptions));
@@ -225,7 +276,7 @@ export class Templates {
 
     private async __updateTemplate(
         templateId: string,
-        request: PogodocApi.UpdateTemplateRequest,
+        request: PogodocApi.UpdateTemplateRequest = {},
         requestOptions?: Templates.RequestOptions,
     ): Promise<core.WithRawResponse<PogodocApi.UpdateTemplateResponse>> {
         const _response = await core.fetcher({
@@ -777,6 +828,91 @@ export class Templates {
                 throw new errors.PogodocApiTimeoutError(
                     "Timeout exceeded when calling POST /templates/{templateId}/clone.",
                 );
+            case "unknown":
+                throw new errors.PogodocApiError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
+     * Fetches all templates belonging to the authenticated user. Optionally filter by category.
+     *
+     * @param {PogodocApi.GetUserTemplatesRequest} request
+     * @param {Templates.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @example
+     *     await client.templates.getUserTemplates()
+     */
+    public getUserTemplates(
+        request: PogodocApi.GetUserTemplatesRequest = {},
+        requestOptions?: Templates.RequestOptions,
+    ): core.HttpResponsePromise<PogodocApi.GetUserTemplatesResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__getUserTemplates(request, requestOptions));
+    }
+
+    private async __getUserTemplates(
+        request: PogodocApi.GetUserTemplatesRequest = {},
+        requestOptions?: Templates.RequestOptions,
+    ): Promise<core.WithRawResponse<PogodocApi.GetUserTemplatesResponse>> {
+        const { category, search, type: type_, sort } = request;
+        const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
+        if (category != null) {
+            _queryParams["category"] = category;
+        }
+
+        if (search != null) {
+            _queryParams["search"] = search;
+        }
+
+        if (type_ != null) {
+            _queryParams["type"] = type_;
+        }
+
+        if (sort != null) {
+            _queryParams["sort"] = sort;
+        }
+
+        const _response = await core.fetcher({
+            url: urlJoin(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.PogodocApiEnvironment.Default,
+                "templates",
+            ),
+            method: "GET",
+            headers: mergeHeaders(
+                this._options?.headers,
+                mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+                requestOptions?.headers,
+            ),
+            queryParameters: _queryParams,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: _response.body as PogodocApi.GetUserTemplatesResponse, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            throw new errors.PogodocApiError({
+                statusCode: _response.error.statusCode,
+                body: _response.error.body,
+                rawResponse: _response.rawResponse,
+            });
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.PogodocApiError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.PogodocApiTimeoutError("Timeout exceeded when calling GET /templates.");
             case "unknown":
                 throw new errors.PogodocApiError({
                     message: _response.error.errorMessage,

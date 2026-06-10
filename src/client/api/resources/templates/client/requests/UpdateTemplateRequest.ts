@@ -4,43 +4,30 @@
 
 /**
  * @example
- *     {
- *         templateInfo: {
- *             title: "title",
- *             description: "description",
- *             type: "docx",
- *             sampleData: {
- *                 "key": "value"
- *             },
- *             categories: ["invoice"]
- *         },
- *         previewIds: {
- *             pngJobId: "pngJobId",
- *             pdfJobId: "pdfJobId"
- *         },
- *         contentId: "contentId"
- *     }
+ *     {}
  */
 export interface UpdateTemplateRequest {
-    templateInfo: UpdateTemplateRequest.TemplateInfo;
-    previewIds: UpdateTemplateRequest.PreviewIds;
+    templateInfo?: UpdateTemplateRequest.TemplateInfo;
+    previewIds?: UpdateTemplateRequest.PreviewIds;
     /** ID by which the new template content is saved */
-    contentId: string;
+    contentId?: string;
 }
 
 export namespace UpdateTemplateRequest {
     export interface TemplateInfo {
         /** Title of the template */
-        title: string;
+        title?: string;
         /** Description of the template */
-        description: string;
+        description?: string;
         /** Type of template to be rendered */
-        type: TemplateInfo.Type;
+        type?: TemplateInfo.Type;
         /** Sample data for the template */
-        sampleData: Record<string, unknown>;
+        sampleData?: Record<string, unknown>;
         sourceCode?: string;
         /** Categories of the template */
-        categories: TemplateInfo.Categories.Item[];
+        categories?: TemplateInfo.Categories.Item[];
+        orientation?: TemplateInfo.Orientation;
+        dimensions?: TemplateInfo.Dimensions;
     }
 
     export namespace TemplateInfo {
@@ -60,21 +47,64 @@ export namespace UpdateTemplateRequest {
         export type Categories = Categories.Item[];
 
         export namespace Categories {
-            export type Item = "invoice" | "mail" | "report" | "cv" | "other";
+            /**
+             * Category of the template
+             */
+            export type Item =
+                | "invoice"
+                | "mail"
+                | "report"
+                | "cv"
+                | "receipt"
+                | "order"
+                | "contract"
+                | "certificate"
+                | "statement"
+                | "brochure"
+                | "warranty"
+                | "poster"
+                | "menu"
+                | "catalog"
+                | "packaging"
+                | "advertisement"
+                | "other"
+                | "favorite";
             export const Item = {
                 Invoice: "invoice",
                 Mail: "mail",
                 Report: "report",
                 Cv: "cv",
+                Receipt: "receipt",
+                Order: "order",
+                Contract: "contract",
+                Certificate: "certificate",
+                Statement: "statement",
+                Brochure: "brochure",
+                Warranty: "warranty",
+                Poster: "poster",
+                Menu: "menu",
+                Catalog: "catalog",
+                Packaging: "packaging",
+                Advertisement: "advertisement",
                 Other: "other",
+                Favorite: "favorite",
             } as const;
+        }
+
+        export type Orientation = "landscape" | "portrait";
+        export const Orientation = {
+            Landscape: "landscape",
+            Portrait: "portrait",
+        } as const;
+
+        export interface Dimensions {
+            width: number;
+            height: number;
         }
     }
 
     export interface PreviewIds {
-        /** ID of the job for the PNG preview */
         pngJobId: string;
-        /** ID of the job for the PDF preview */
         pdfJobId: string;
     }
 }
